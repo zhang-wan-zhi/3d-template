@@ -1,0 +1,33 @@
+.custom{
+
+  /deep/ .el-carousel__indicators--horizontal{
+    bottom: -10PX;
+    .el-carousel__indicator--horizontal{
+      .el-carousel__button{
+        display: block;
+        background-color: transparent;
+        outline: 0;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        -webkit-transition: .3s;
+        transition: .3s;
+        width:10px;
+        height:10px;
+        border:1px solid rgba(100,114,255,1);
+        border-radius:50%;
+        opacity:1;
+      }
+
+    }
+    .el-carousel__indicator{
+      &.is-active button{
+        width:25px;
+        height:10px;
+        background:rgba(100,114,255,1);
+        opacity:1;
+        border-radius:5px;
+      }
+    }
+  }
+}

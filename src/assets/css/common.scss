@@ -1,0 +1,118 @@
+
+
+.text-green{
+  color: #07D68C;
+}
+.text-blue{
+  color: #6699FF;
+}
+.text-red{
+  color: #FD3B73;
+}
+.text-yellow{
+  color: #EA9A11;
+}
+.text-violet{
+  color: #E768FF;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  border-radius: 5px;
+} /* 这是针对缺省样式 (必须的) */
+::-webkit-scrollbar-track {
+  background-color: rgba(10,11,26,0.8);;
+} /* 滚动条的滑轨背景颜色 */
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(100,114,255,0.5);
+} /* 滑块颜色 */
+
+::-webkit-scrollbar-button {
+  background-color: transparent;
+} /* 滑轨两头的监听按钮颜色 */
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+} /* 横向滚动条和纵向滚动条相交处尖角的颜色 */
+
+/*渐变字体颜色*/
+.font-color-blue {
+  background-image: linear-gradient(#70fdff, #00b7fe);
+  color: transparent;
+  background-clip: text;
+}
+
+.font-color-green {
+  // background-image: linear-gradient(#d2dea2, #79df31);
+  color: transparent;
+  background-clip: text;
+}
+
+.font-color-orange {
+  background-image: linear-gradient(#fde641, #ffa147);
+  color: transparent;
+  background-clip: text;
+}
+
+.font-color-pink {
+  background-image: linear-gradient(#FEA2A2, #CF61DD);
+  color: transparent;
+  background-clip: text;
+}
+
+.font-color-blue2 {
+  background-image: linear-gradient(
+    180deg,
+    rgba(4, 182, 255, 1) 0%,
+    rgba(101, 239, 248, 1) 100%
+  );
+  color: transparent;
+  background-clip: text;
+}
+/*表格*/
+.seamless-warp {
+  height: 13vh;
+  overflow: hidden;
+}
+.seamless-warp-table {
+  /*overflow-y: hidden;*/
+  overflow: auto;
+  margin-top: 10px;
+  height: calc(100% - 30px);
+}
+
+.seamless-warp-table ul {
+  width: 100%;
+}
+
+.seamless-warp-table li {
+  width: 100%;
+  height: 38px;
+  display: flex;
+  line-height: 38px;
+  font-size: 0.16rem;
+  color: #bcccef;
+  border-bottom: 1px solid rgba(111, 137, 194, 0.5);
+  overflow: hidden;
+}
+
+.seamless-warp-table li:hover {
+  background: #105086;
+}
+
+.seamless-warp-table>ul:first-child li {
+  background: rgba(18, 85, 141, 0.2);
+  border-bottom: 0
+}
+
+.seamless-warp-table li span {
+  display: inline-block;
+  float: left;
+  box-sizing: border-box;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.table-text-left li>span {
+  text-align: left;
+}

@@ -1,12 +1,18 @@
 <template>
-  <div id="WebGL-output"></div>
+  <div id="WebGL-output">
+    <Card v-if="showCard"></Card>
+  </div>
 </template>
 <script>
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import Card from "../../components/card/index.vue";
 export default {
   name: "mapbg",
+  components: {
+    Card,
+  },
   data() {
     return {
       scene: null,
@@ -20,6 +26,7 @@ export default {
       width: 1920,
       height: 1080,
       modelUrl: "/models/dixing.glb",
+      showCard: false,
     };
   },
   methods: {
@@ -55,8 +62,8 @@ export default {
       );
       this.renderer.domElement.addEventListener("click", (event) => {
         const { offsetX, offsetY } = event;
-        const x = (offsetX / window.innerWidth) * 2 - 1;
-        const y = -(offsetY / window.innerHeight) * 2 + 1;
+        const x = (offsetX / this.width) * 2 - 1;
+        const y = -(offsetY / this.height) * 2 + 1;
         const mousePoint = new THREE.Vector2();
         mousePoint.x = x;
         mousePoint.y = y;
@@ -68,10 +75,11 @@ export default {
           this.scene.children,
           true
         );
-        /* if (intersects.length > 0) {
-          intersects[0].object.material.color.set(0xe10e0e);
-        } */
-        console.log(intersects[0].object.name);
+        if (intersects.length > 0) {
+          this.showCard = !this.showCard;
+          console.log(intersects[0].object.name);
+        }
+
         // 过滤网格和地面
         /* const intersect = intersects.filter(
           (intersect) =>
@@ -105,7 +113,7 @@ export default {
         // mesh方法
         // 4/5改变主体
         // loadscene.children[0].children[1].material.color.set(0xf10303);
-        loadscene.scale.set(11, 11, 11);
+        loadscene.scale.set(13, 13, 13);
         loadscene.rotation.set(0, 0, 0);
         loadscene.position.set(-10, 0, 0);
 

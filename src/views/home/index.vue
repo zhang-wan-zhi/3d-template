@@ -3,11 +3,10 @@
     <div class="title">数字孪生智慧台站</div>
     <HeaderNav></HeaderNav>
     <div class="cascader-home">
-      <cascader></cascader>
+      <cascader :data="data"></cascader>
     </div>
-
     <div class="content">
-      <!-- <router-view></router-view> -->
+      <router-view></router-view>
     </div>
   </div>
 </template>
@@ -21,7 +20,43 @@ export default {
     cascader,
   },
   data() {
-    return {};
+    return {
+      data: [
+        {
+          label: "浙江省",
+          checked: true,
+          children: [
+            {
+              label: "杭州市",
+              checked: false,
+              children: [
+                {
+                  label: "西湖区",
+                  checked: false,
+                  children: [
+                    {
+                      label: "杭州老和山地震台",
+                      checked: false,
+                      children: [],
+                    },
+                    {
+                      label: "杭州植物园地震台",
+                      checked: false,
+                      children: [],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              label: "建德市",
+              checked: false,
+              children: [],
+            },
+          ],
+        },
+      ],
+    };
   },
   methods: {},
   created() {},

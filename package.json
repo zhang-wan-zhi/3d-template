@@ -10,7 +10,7 @@
     "@jiaminghi/data-view": "^2.10.0",
     "axios": "^0.19.2",
     "core-js": "^3.6.0",
-    "echarts": "^4.8.0",
+    "echarts": "^5.1.2",
     "element-ui": "^2.13.2",
     "lodash-es": "^4.17.15",
     "moment": "^2.27.0",

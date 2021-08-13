@@ -1,6 +1,6 @@
 <template>
   <div id="WebGL-output">
-    <Card v-if="showCard"></Card>
+    <Card v-if="showCard" @close="close" :station-name="stationName"></Card>
   </div>
 </template>
 <script>
@@ -25,12 +25,22 @@ export default {
       group: null,
       width: 1920,
       height: 1080,
-      modelUrl: "/models/dixing.glb",
+      modelUrl: "/models/QB.glb",
       showCard: false,
+      loadscene: null,
+      x: 10,
+      y: 10,
+      z: 10,
+      stationName: ''
     };
   },
   methods: {
+    close() {
+      console.log('1111');
+      this.showCard = false
+    },
     init() {
+      let self = this
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(0x000000);
 
@@ -60,7 +70,10 @@ export default {
         this.camera,
         this.renderer.domElement
       );
+      
       this.renderer.domElement.addEventListener("click", (event) => {
+        /* self.showCard = false */
+        
         const { offsetX, offsetY } = event;
         const x = (offsetX / this.width) * 2 - 1;
         const y = -(offsetY / this.height) * 2 + 1;
@@ -75,9 +88,18 @@ export default {
           this.scene.children,
           true
         );
+        console.log('intersects',intersects);
         if (intersects.length > 0) {
-          this.showCard = !this.showCard;
-          console.log(intersects[0].object.name);
+          /* self.close() */
+          intersects.forEach(element => {
+            if(element.object.name.indexOf('站') !== -1 || element.object.name.indexOf('台') !== -1) {
+              console.log(element.object.name);
+              this.stationName = element.object.name
+              self.showCard = true;
+              console.log(self.showCard);
+            }
+          });
+          console.log(intersects[0].object.name, intersects[0].object.position);
         }
 
         // 过滤网格和地面
@@ -103,22 +125,108 @@ export default {
 
       loader1.load(this.modelUrl, function (gltf) {
         // 模型组loadscene
-        const loadscene = gltf.scene;
-        loadscene.traverse(function (object) {
+        self.loadscene = gltf.scene;
+        self.loadscene.traverse(function (object) {
           if (object.isMesh) {
             object.castShadow = true;
           }
         });
-        console.log("Wuti", loadscene);
+        self.loadscene.children[1].visible = true
+        console.log("Wuti", self.loadscene);
         // mesh方法
         // 4/5改变主体
         // loadscene.children[0].children[1].material.color.set(0xf10303);
-        loadscene.scale.set(13, 13, 13);
-        loadscene.rotation.set(0, 0, 0);
-        loadscene.position.set(-10, 0, 0);
-
-        self.scene.add(loadscene);
+        self.loadscene.scale.set(13, 13, 13);
+        self.loadscene.rotation.set(0, 0, 0);
+        self.loadscene.position.set(-10, 0, 0);
+        console.log("self.loadscene", self.loadscene);
+        self.scene.add(self.loadscene);
+        /* self.loaderImg(); */
       });
+    },
+    loaderImg() {
+      let seft = this;
+      console.log("this.loadscene", this.loadscene);
+      // 加载texture的一个类。 内部使用ImageLoader来加载文件。
+      let texture = new THREE.TextureLoader().load("/models/ball.png");
+      // wrapS这个值定义了纹理贴图在水平方向上将如何包裹，RepeatWrapping纹理将简单地重复到无穷大
+      // wrapT这个值定义了纹理贴图在垂直方向上将如何包裹
+      // 变成一个圈
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping; //每个都重复
+      // 纹理将在表面上，分别在U、V方向重复多少次。
+      texture.repeat.set(1, 1);
+      // 将其设置为true，以便在下次使用纹理时触发一次更新。 这对于设置包裹模式尤其重要。
+      texture.needsUpdate = true;
+      // 圆柱几何体（CylinderGeometry）
+      // 圆柱的顶部半径/圆柱的底部半径/圆柱的高度/圆柱侧面周围的分段数
+      let geometry = new THREE.CylinderGeometry(10, 10, 15, 64);
+      let materials = [
+        // 基础网格材质(MeshBasicMaterial)一个以简单着色（平面或线框）方式来绘制几何体的材质。
+        new THREE.MeshBasicMaterial({
+          // 颜色贴图。默认为null
+          map: texture,
+          side: THREE.DoubleSide,
+          // 材质透明？
+          transparent: true,
+        }),
+        new THREE.MeshBasicMaterial({
+          transparent: true,
+          // 可见度
+          opacity: 0,
+          side: THREE.DoubleSide,
+        }),
+        new THREE.MeshBasicMaterial({
+          transparent: true,
+          opacity: 0,
+          side: THREE.DoubleSide,
+        }),
+      ];
+      let mesh = new THREE.Mesh(geometry, materials);
+      mesh.position.set(
+        125.36941528320312,
+        51.433692932128906,
+        -0.1852910816669464
+      );
+      /* mesh.rotation.set(0, 0.6, 0.6); */
+
+      // 先获取geometey的中心点位置并留存
+      /* let center = new THREE.Vector3();
+      mesh.geometry.computeBoundingBox();
+      mesh.geometry.boundingBox.getCenter(center);
+      let x = center.x;
+      let y = center.y;
+      let z = center.z; */
+
+      // 把对象放到坐标原点
+     /*  mesh.geometry.center(); */
+
+      // 绕轴旋转
+      /* mesh.geometry.rotateY(180); */
+      mesh.rotation.set(-80, 0, 0);
+
+      // 再把对象放回原来的地方
+      /* mesh.geometry.translate(x, y, z);
+      console.log(mesh); */
+
+      this.loadscene.children[2].add(mesh);
+      console.log("this.loadscene", this.loadscene);
+      let s = 0;
+      let p = 1;
+      function animate1() {
+        // 一定要在此函数中调用
+        s += 0.1;
+        p -= 0.1;
+        if (s > 2) {
+          s = 0;
+          p = 1;
+        }
+        mesh.scale.set(1 + s, 1, 1 + s);
+        mesh.material[0].opacity = p;
+
+        requestAnimationFrame(animate1);
+      }
+
+      animate1();
     },
     animate() {
       requestAnimationFrame(this.animate);
@@ -137,5 +245,7 @@ export default {
 <style>
 #WebGL-output {
   position: absolute;
+  width: 1920px;
+  height: 1080px;
 }
 </style>

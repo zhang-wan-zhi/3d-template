@@ -6,14 +6,15 @@
       backgroundImage: `url(${img})`,
     }"
   >
-    <div class="title">杭州老和山地震台</div>
+    <div class="title">{{ stationName }}</div>
+    <i class="el-icon-close" @click="closeCard"></i>
     <div class="num">33010601</div>
     <div class="line1">无人值守/测震</div>
     <div class="line2">建站：1996-03-01</div>
     <div class="line2">运营商：电信</div>
     <div class="line2">联网方式：SDH</div>
     <div class="line2">UPS电池安装日期：2011-03-01</div>
-    <div class="btn-station">
+    <div class="btn-station" @click="interior">
       <i class="el-icon-office-building"></i>
       <span>台站内部</span>
     </div>
@@ -41,15 +42,48 @@
 <script>
 export default {
   name: "Card",
+  props: {
+    stationName: "",
+  },
   data() {
     return {
       img: require("../../assets/img/card/Vector38.png"),
     };
   },
+  methods: {
+    closeCard() {
+      this.$emit("close");
+    },
+    interior() {
+      this.$router.push('stationInterior')
+      this.closeCard()
+    }
+  },
+  watch: {
+    stationName(newV, oldV) {
+      // do something
+      console.log(newV, oldV);
+      let y = window.innerHeight;
+      document.onclick = function (event) {
+        console.log(event);
+        if (event.clientY < y / 2) {
+          let left = event.offsetX + "px";
+          let top = event.offsetY + "px";
+          let element = document.getElementById("card-id");
+          element.style.transform = `translate(${left},${top})`;
+        } else {
+          let xx = event.offsetX - 327 + "px";
+          let yy = event.offsetY - 415 + "px";
+          let element = document.getElementById("card-id");
+          element.style.transform = `translate(${xx},${yy})`;
+        }
+        document.onclick = null;
+      };
+    },
+  },
   mounted() {
     console.log("mounted");
     let y = window.innerHeight;
-    console.log(y);
     document.onclick = function (event) {
       console.log(event);
       if (event.clientY < y / 2) {
@@ -78,6 +112,14 @@ export default {
   z-index: 999;
   left: 0;
   right: 0;
+  .el-icon-close {
+    position: absolute;
+    font-size: 20px;
+    right: 15px;
+    top: 15px;
+    color: #fff;
+    cursor: pointer;
+  }
   .title {
     font-size: 18px;
     color: #10f492;
@@ -105,6 +147,7 @@ export default {
     background: #00495b;
     color: #fff;
     text-align: center;
+    cursor: pointer;
     span {
       margin-left: 8px;
     }
@@ -121,10 +164,10 @@ export default {
     color: #fff;
   }
   .phone-box {
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      margin-top: 16px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    margin-top: 16px;
     .box-item {
       display: flex;
       align-items: center;

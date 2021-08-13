@@ -1,5 +1,5 @@
 <template>
-  <div class="header">
+  <div class="header-btm">
     <div class="loading">
       <span></span>
       <span></span>
@@ -71,8 +71,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "../../../assets/css/mixins";
-.header {
+/* @import "../../../assets/css/mixins"; */
+.header-btm {
   width: 100%;
   height: 77px;
   position: fixed;

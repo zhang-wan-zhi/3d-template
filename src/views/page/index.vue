@@ -13,16 +13,19 @@
       <echart-right></echart-right>
     </div>
     <div class="distribution" v-if="checked == 1">
-      <img src="../../assets/img/icon/page/Frame2.png" alt="">
+      <distribution></distribution>
+      <!-- <img src="../../assets/img/icon/page/Frame2.png" alt=""> -->
     </div>
   </div>
 </template>
 
 <script>
 import EchartRight from '../../components/EchartRight/index.vue'
+import distribution from './components/distribution.vue'
 export default {
   components: {
-    EchartRight
+    EchartRight,
+    distribution
   },
   data() {
     return {

@@ -58,8 +58,9 @@
           </div>
         </div>
         <div class="submain">
-          <span class="label">测震</span> <span class="word">强震</span>
-          <span class="gnss">GNSS</span> <span class="tag-1">前兆</span>
+          <span class="label" @click="changeStatus">测震</span>
+          <span class="word">强震</span> <span class="gnss">GNSS</span>
+          <span class="tag-1">前兆</span>
         </div>
         <div class="row">
           <div class="group-1">
@@ -208,7 +209,16 @@
 </template>
 
 <script>
-export default {};
+export default {
+  methods: {
+    /* ...mapActions("map", [
+      "seismometry",
+    ]), */
+    changeStatus() {
+      this.$store.commit('map/change_Seismometry')
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -377,6 +387,7 @@ export default {};
     color: #ffffff;
     font-size: 14px;
     font-weight: 400;
+    cursor: pointer;
   }
 
   .word {
@@ -385,6 +396,7 @@ export default {};
     color: #ffffff;
     font-size: 14px;
     font-weight: 400;
+    cursor: pointer;
   }
 
   .gnss {
@@ -393,6 +405,7 @@ export default {};
     color: #ffffff;
     font-size: 14px;
     font-weight: 400;
+    cursor: pointer;
   }
 
   .tag-1 {
@@ -400,6 +413,7 @@ export default {};
     color: #ffffff;
     font-size: 14px;
     font-weight: 400;
+    cursor: pointer;
   }
 
   .row {

@@ -10,6 +10,7 @@ import vueSeamlessScroll from "vue-seamless-scroll";
 import axios from 'axios';
 import {echartsSize} from './assets/js/util.js'
 import dataV from '@jiaminghi/data-view'
+import store from './store'
 
 Vue.use(dataV)
 Vue.prototype.$echarts = echarts;
@@ -21,5 +22,6 @@ Vue.config.productionTip = false;
 Vue.prototype.echartsSize = echartsSize;
 new Vue({
   router,
+  store,
   render: (h) => h(App),
 }).$mount("#app");

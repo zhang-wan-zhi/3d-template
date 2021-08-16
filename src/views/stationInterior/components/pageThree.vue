@@ -1,5 +1,6 @@
 <template>
   <div class="page-divree">
+    <load-modules v-if="showModules" @close="close"></load-modules>
     <div class="table-hd">
       <!-- 表头 -->
       <div>序号</div>
@@ -17,7 +18,7 @@
     </div>
     <div class="th">
       <div class="mod">
-        <div class="floor-bg-wrapper">
+        <div class="floor-bg-wrapper" @click="showModules = true">
           <span class="num">1</span> <span class="num-1">24140022</span>
           <span class="tag">UPS主机</span> <span class="label">通用</span>
           <span class="kva">1KVA</span>
@@ -99,7 +100,22 @@
 </template>
 
 <script>
-export default {};
+import LoadModules from '../../../components/LoadModules/index.vue'
+export default {
+  components: {
+    LoadModules
+  },
+  data() {
+    return {
+      showModules: false
+    }
+  },
+  methods: {
+    close() {
+      this.showModules = false
+    }
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -126,6 +142,7 @@ export default {};
       position: relative;
       align-items: flex-end;
       flex-direction: row;
+      cursor: pointer;
     }
 
     .num {

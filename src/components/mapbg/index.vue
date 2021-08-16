@@ -31,16 +31,37 @@ export default {
       x: 10,
       y: 10,
       z: 10,
-      stationName: ''
+      stationName: "",
     };
+  },
+  computed: {
+    seismometry() {
+      /* this.loadscene.children[1].visible = true; */
+      console.log('111111222222');
+      /* if(this.$store.state.map.seismometry) {
+        this.loadscene.children[1].visible = true;
+      } else {
+        this.loadscene.children[1].visible = false;
+      } */
+      return this.$store.state.map.seismometry
+    }
+  },
+  watch: {
+    seismometry: function (value) {
+      if(value) {
+        this.loadscene.children[2].visible = true;
+      } else {
+        this.loadscene.children[2].visible = false;
+      }
+    }
   },
   methods: {
     close() {
-      console.log('1111');
-      this.showCard = false
+      console.log("1111");
+      this.showCard = false;
     },
     init() {
-      let self = this
+      let self = this;
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(0x000000);
 
@@ -70,10 +91,10 @@ export default {
         this.camera,
         this.renderer.domElement
       );
-      
+
       this.renderer.domElement.addEventListener("click", (event) => {
         /* self.showCard = false */
-        
+
         const { offsetX, offsetY } = event;
         const x = (offsetX / this.width) * 2 - 1;
         const y = -(offsetY / this.height) * 2 + 1;
@@ -88,13 +109,16 @@ export default {
           this.scene.children,
           true
         );
-        console.log('intersects',intersects);
+        console.log("intersects", intersects);
         if (intersects.length > 0) {
           /* self.close() */
-          intersects.forEach(element => {
-            if(element.object.name.indexOf('站') !== -1 || element.object.name.indexOf('台') !== -1) {
+          intersects.forEach((element) => {
+            if (
+              element.object.name.indexOf("站") !== -1 ||
+              element.object.name.indexOf("台") !== -1
+            ) {
               console.log(element.object.name);
-              this.stationName = element.object.name
+              this.stationName = element.object.name;
               self.showCard = true;
               console.log(self.showCard);
             }
@@ -131,7 +155,7 @@ export default {
             object.castShadow = true;
           }
         });
-        self.loadscene.children[1].visible = true
+        
         console.log("Wuti", self.loadscene);
         // mesh方法
         // 4/5改变主体
@@ -198,7 +222,7 @@ export default {
       let z = center.z; */
 
       // 把对象放到坐标原点
-     /*  mesh.geometry.center(); */
+      /*  mesh.geometry.center(); */
 
       // 绕轴旋转
       /* mesh.geometry.rotateY(180); */

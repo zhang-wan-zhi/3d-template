@@ -9,7 +9,7 @@
     </div>
     <i class="el-icon-arrow-right"></i>
     <div class="header-nav">
-      <div class="nav-btn" @mouseover="hoverHandle(0)" @mouseleave="leaveHandle">
+      <div class="nav-btn" @mouseover="hoverHandle(0)" @mouseleave="leaveHandle" @click="toGis">
         <img src="../../../assets/img/icon/header/fi_map.png">
         <div>GIS</div>
       </div>
@@ -63,6 +63,9 @@ export default {
     leaveHandle() {
       let underline = document.getElementById('underline');
       underline.style.transform = "translateX("+123*this.navIndex+"px)"
+    },
+    toGis() {
+      this.$router.push('page')
     }
   },
   mounted() {},

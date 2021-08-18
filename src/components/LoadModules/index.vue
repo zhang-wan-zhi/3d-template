@@ -1,5 +1,6 @@
 <template>
   <div id="app1">
+    <div class="title">{{modelName}}</div>
     <div class="btn-dilog">
       <div class="btn-d" @click="play">分解</div>
       <div class="btn-d" @click="pause">合并</div>
@@ -24,13 +25,20 @@ export default {
       controls: null,
       mixers: [],
       stats: null,
-      modelPath: "/moudles/fkd8.fbx",
-      modelPath2: "/models/2.fbx",
-      modelPath3: "/moudles/dixing.glb",
+      modelPath: "/moudles/josn1/tileset.json",
+      modelPath2: "/models/3.fbx",
+      modelPath3: "/models/fkd8.fbx",
       mixer: null,
       clock: null,
       object: null,
-      loading: true
+      loading: true,
+      renderEnabled: false,
+      timeOut: null,
+      animateFrame: null,
+      animateFrame2: null,
+      animation: null,
+      showCanvs: false,
+      modelName: ''
     };
   },
   methods: {
@@ -84,7 +92,7 @@ export default {
       self.controls.update();
       self.controls.enablePan = false;
       self.controls.enableDamping = true;
-
+      // 加载模型
       let fbxLoader = new FBXLoader();
       fbxLoader.load(self.modelPath2, function (object) {
         self.object = object;
@@ -92,11 +100,14 @@ export default {
         object.position.set(0, -1, 0);
         object.scale.set(0.02, 0.02, 0.02);
         self.scene.add(object);
-        self.loading = false
+        self.loading = false;
         self.mixer = new THREE.AnimationMixer(self.object);
-        self.animate();
       });
-
+      // 加载json模型
+      /* var loader = new THREE.ObjectLoader();
+      loader.load(self.modelPath, function (obj) {
+        self.scene.add(obj);
+      }); */
       // stats
       /* self.stats = new Stats();
       container.appendChild(self.stats.dom); */
@@ -111,51 +122,115 @@ export default {
         self.scene.add(object.scene);
       }); */
     },
+    loadImg() {},
+    addEvent() {
+      let self = this;
+      this.renderer.domElement.addEventListener("click", (event) => {
+        /* self.showCard = false */
+        let container = document.getElementById("app1");
+
+        const { offsetX, offsetY } = event;
+        const x = (offsetX / container.clientWidth) * 2 - 1;
+        const y = -(offsetY / container.clientHeight) * 2 + 1;
+        const mousePoint = new THREE.Vector2();
+        mousePoint.x = x;
+        mousePoint.y = y;
+        const raycaster = new THREE.Raycaster();
+        // 设置鼠标位置和参考相机
+        raycaster.setFromCamera(mousePoint, this.camera);
+        // 鼠标点击对应的物体（所有鼠标映射到的物体，包括被遮挡的）
+        const intersects = raycaster.intersectObjects(
+          this.scene.children,
+          true
+        );
+        console.log("intersects", intersects);
+        if (intersects.length > 0) {
+          /* self.close() */
+          self.modelName = intersects[0].object.name
+          /* intersects.forEach((element) => {
+            console.log('element',element);
+          }); */
+        }
+
+        // 过滤网格和地面
+        /* const intersect = intersects.filter(
+          (intersect) =>
+            !(intersect.object instanceof GridHelper) &&
+            intersect.object.name !== "plane"
+        )[0]; */
+      });
+    },
     play() {
       /* this.mixer.clipAction(this.object.animations[0]).play();
       this.animate2(); */
-
-      let animation = this.mixer.clipAction(this.object.animations[0]);
-      console.log("THREE.LoopOnce", animation);
-      animation.setLoop(THREE.LoopOnce);
-      animation.clampWhenFinished = true;
-      animation.enable = true;
-      animation.play();
+      this.renderEnabled = true;
+      this.animation = this.mixer.clipAction(this.object.animations[0]);
+      /* console.log("THREE.LoopOnce", animation); */
+      this.animation.setLoop(THREE.LoopOnce); //不循环播放
+      this.animation.clampWhenFinished = true; //暂停在最后一帧播放的状态
+      this.animation.enable = true;
+      this.animation.time = 0; //操作对象设置开始播放时间
+      this.object.animations[0].duration = 7; //剪辑对象设置播放结束时间
+      this.animation.play();
+      /* this.timeRender(); */
       this.animate2();
     },
     pause() {
-      console.log("pause");
-      this.mixer.clipAction(this.object.animations[0]).stop();
+      console.log("pause", this.animation.paused);
+      this.animation.paused = false;
+      this.animation.play();
+      this.animation.time = 7;
+      this.object.animations[0].duration = 14; //操作对象设置开始播放时间
     },
     animate() {
-      requestAnimationFrame(this.animate);
+      this.animateFrame2 = requestAnimationFrame(this.animate);
       this.renderer.clear();
       /* const delta = this.clock.getDelta();
       this.mixer.update(delta); */
-
       this.renderer.render(this.scene, this.camera);
-
       this.renderer.clearDepth();
     },
     animate2() {
-      requestAnimationFrame(this.animate2);
-      this.renderer.clear();
-      const delta = this.clock.getDelta();
-      this.mixer.update(delta);
-      this.renderer.render(this.scene, this.camera);
-      this.renderer.clearDepth();
+      this.animateFrame = requestAnimationFrame(this.animate2);
+      if (this.renderEnabled) {
+        // 这里是你自己业务上需要的code
+        /* this.renderer.clear(); */
+        const delta = this.clock.getDelta();
+        this.mixer.update(delta);
+        /* this.renderer.render(this.scene, this.camera);
+        this.renderer.clearDepth(); */
+      }
     },
     closeCard() {
       this.$emit("close");
     },
+    timeRender(time = 3000) {
+      this.renderEnabled = true;
+
+      clearTimeout(this.timeOut);
+      /* if (timeOut) {
+        console.log('timeOut',timeOut);
+        
+      } */
+      this.timeOut = setTimeout(() => {
+        this.renderEnabled = false;
+        console.log("this.renderEnabled", this.renderEnabled);
+      }, time);
+    },
   },
   mounted() {
     this.init();
+    this.loadImg();
+    this.addEvent()
     this.animate();
+  },
+  beforeDestroy() {
+    cancelAnimationFrame(this.animateFrame2);
+    cancelAnimationFrame(this.animateFrame);
   },
 };
 </script>
-<style>
+<style scoped lang="scss">
 #app1 {
   position: fixed;
   height: 700px;
@@ -164,6 +239,12 @@ export default {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 9999;
+  .title {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translate(-50%, 0);
+  }
 }
 .btn-dilog {
   position: absolute;

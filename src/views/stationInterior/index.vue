@@ -61,7 +61,7 @@
           <div class="icon-shu"></div>
           <div
             :class="['nav-btn', page == 4 ? 'nav-btn-active' : '']"
-            @click="page = 4"
+            @click="changePath"
           >
             台站图片
           </div>
@@ -103,6 +103,11 @@ export default {
       page: 1,
     };
   },
+  methods: {
+    changePath() {
+      this.$router.push('house')
+    }
+  }
 };
 </script>
 

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <mapbg></mapbg>
+    <!-- <mapbg></mapbg> -->
     <router-view />
   </div>
 </template>

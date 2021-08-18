@@ -271,5 +271,6 @@ export default {
   position: absolute;
   width: 1920px;
   height: 1080px;
+  z-index: 9;
 }
 </style>

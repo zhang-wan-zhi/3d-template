@@ -9,29 +9,64 @@
     </div>
     <i class="el-icon-arrow-right"></i>
     <div class="header-nav">
-      <div class="nav-btn" @mouseover="hoverHandle(0)" @mouseleave="leaveHandle" @click="toGis">
-        <img src="../../../assets/img/icon/header/fi_map.png">
+      <div
+        :class="['nav-btn', navIndex == 0 ? 'active-nav' : '']"
+        @mouseover="hoverHandle(0)"
+        @mouseleave="leaveHandle"
+        @click="toGis"
+      >
+        <!-- <img src="../../../assets/img/icon/header/fi_map.png" /> -->
+        <i class="el-icon-aim icon"></i>
         <div>GIS</div>
       </div>
-      <div class="nav-btn" @mouseover="hoverHandle(1)"  @mouseleave="leaveHandle">
-        <img src="../../../assets/img/icon/header/fi_alert-circle.png">
+      <div
+        :class="['nav-btn', navIndex == 1 ? 'active-nav' : '']"
+        @mouseover="hoverHandle(1)"
+        @mouseleave="leaveHandle"
+        @click="toWaring"
+      >
+        <!-- <img src="../../../assets/img/icon/header/fi_alert-circle.png" /> -->
+        <i class="el-icon-warning-outline icon"></i>
         <div>告警</div>
       </div>
-      <div class="nav-btn" @mouseover="hoverHandle(2)"  @mouseleave="leaveHandle">
-        <img src="../../../assets/img/icon/header/fi_monitor.png">
+      <div
+        :class="['nav-btn', navIndex == 2 ? 'active-nav' : '']"
+        @mouseover="hoverHandle(2)"
+        @mouseleave="leaveHandle"
+        @click="toWorking"
+      >
+        <!-- <img src="../../../assets/img/icon/header/fi_monitor.png" /> -->
+        <i class="el-icon-monitor icon"></i>
         <div>工作流</div>
       </div>
-      <div class="nav-btn" @mouseover="hoverHandle(3)"  @mouseleave="leaveHandle">
-        <img src="../../../assets/img/icon/header/fi_bar-chart-2.png">
+      <div
+        :class="['nav-btn', navIndex == 3 ? 'active-nav' : '']"
+        @mouseover="hoverHandle(3)"
+        @mouseleave="leaveHandle"
+      >
+        <!-- <img src="../../../assets/img/icon/header/fi_bar-chart-2.png" /> -->
+        <i class="el-icon-s-data icon"></i>
         <div>统计</div>
       </div>
-      <div class="nav-btn" @mouseover="hoverHandle(4)"  @mouseleave="leaveHandle">
-        <img src="../../../assets/img/icon/header/fi_video.png">
+      <div
+        :class="['nav-btn', navIndex == 4 ? 'active-nav' : '']"
+        @mouseover="hoverHandle(4)"
+        @mouseleave="leaveHandle"
+        @click="toMonitoring"
+      >
+        <!-- <img src="../../../assets/img/icon/header/fi_video.png" /> -->
+        <i class="el-icon-video-camera icon"></i>
         <div>视频监控</div>
       </div>
-      <div class="nav-btn" @mouseover="hoverHandle(5)"  @mouseleave="leaveHandle">
-        <img src="../../../assets/img/icon/header/fi_menu.png">
-        <div>其他</div>
+      <div
+        :class="['nav-btn', navIndex == 5 ? 'active-nav' : '']"
+        @mouseover="hoverHandle(5)"
+        @mouseleave="leaveHandle"
+        @click="toOther"
+      >
+        <i class="el-icon-s-operation icon"></i>
+        <!-- <img src="../../../assets/img/icon/header/fi_menu.png" /> -->
+        <div :class="navIndex == 5 ? 'active-nav' : ''">其他</div>
       </div>
       <div id="underline"></div>
     </div>
@@ -52,23 +87,51 @@ export default {
   name: "HeaderNav",
   data() {
     return {
-      navIndex: 0
+      navIndex: 0,
     };
+  },
+  watch: {
+    $route(to, from) {
+      console.log(from.name); //从哪来
+      console.log(to.name); //到哪去
+    },
   },
   methods: {
     hoverHandle(index) {
-      let underline = document.getElementById('underline');
-      underline.style.transform = "translateX("+123*index+"px)"
+      let underline = document.getElementById("underline");
+      underline.style.transform = "translateX(" + 123 * index + "px)";
     },
     leaveHandle() {
-      let underline = document.getElementById('underline');
-      underline.style.transform = "translateX("+123*this.navIndex+"px)"
+      let underline = document.getElementById("underline");
+      underline.style.transform = "translateX(" + 123 * this.navIndex + "px)";
     },
     toGis() {
-      this.$router.push('page')
+      this.$router.push("page");
+      this.navIndex = 0;
+    },
+    toWaring() {
+      this.navIndex = 1;
+      this.$router.push("warning");
+    },
+    toWorking() {
+      this.navIndex = 2;
+      this.$router.push("working");
+    },
+    toMonitoring() {
+      this.navIndex = 4;
+      this.$router.push("monitoring");
+    },
+    toOther() {
+      this.navIndex = 5;
+      this.$router.push("other");
+    },
+    changeIndex() {
+      
     }
   },
-  mounted() {},
+  mounted() {
+    
+  },
   deactivated() {},
 };
 </script>
@@ -78,17 +141,18 @@ export default {
 .header-btm {
   width: 100%;
   height: 77px;
-  position: fixed;
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
   top: 949px;
+  z-index: 999;
   .el-icon-arrow-right {
-    color: #FB494B;
+    color: #fb494b;
     margin: 0 20px;
   }
   .el-icon-arrow-left {
-    color: #FB494B;
+    color: #fb494b;
     margin: 0 20px;
   }
 }
@@ -113,20 +177,26 @@ export default {
     align-items: center;
     cursor: pointer;
     color: #fff;
-    img {
+    .icon {
       width: 24px;
       height: 24px;
+      font-size: 24px;
+      /* -webkit-filter: drop-shadow(red 20px 0);
+      filter: drop-shadow(red 20px 0); */
     }
   }
+  .active-nav {
+    color: #10f492;
+  }
   .nav-btn:hover {
-    color: #10F492;
+    color: #10f492;
   }
   #underline {
     position: absolute;
     left: 82px;
-    bottom:0;
-    height:4px;
-    background-color: #10F492;
+    bottom: 0;
+    height: 4px;
+    background-color: #10f492;
     transition: all 0.3s ease;
     height: 2px;
     width: 123px;

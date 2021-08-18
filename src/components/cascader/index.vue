@@ -4,7 +4,7 @@
       <dv-decoration-4 style="width: 5px; height: 130px; z-index: 9999" />
       <img src="../../assets/img/icon/cascader/Vector37.png" alt="" />
     </div>
-    <div class="search">搜索</div>
+    <div class="search" v-if="tier == '23'">搜索</div>
     <div v-for="item in treeData" :key="item.label">
       <div class="cascader-1" @click="checked(item)">
         <img src="../../assets/img/icon/cascader/Vector28.png" />
@@ -20,7 +20,11 @@
         :key="item2.label"
         v-show="item.checked"
       >
-        <div class="cascader-2" @click="checked(item2)">
+        <div
+          class="cascader-2"
+          @click="checked(item2)"
+          v-if="tier.indexOf('2') !== -1"
+        >
           <div class="cascader-2-main">
             {{ item2.label + "(" + item2.children.length + ")" }}
             <i
@@ -33,7 +37,11 @@
           :key="item3.label"
           v-show="item2.checked"
         >
-          <div class="cascader-3" @click="checked(item3)">
+          <div
+            class="cascader-3"
+            @click="checked(item3)"
+            v-if="tier.indexOf('3') !== -1"
+          >
             <div class="cascader-3-main">
               {{ item3.label + "(" + item3.children.length + ")" }}
               <i
@@ -69,6 +77,10 @@ export default {
   name: "cascader",
   props: {
     data: [],
+    tier: {
+      type: String,
+      default: "23",
+    },
   },
   data() {
     return {
@@ -85,7 +97,7 @@ export default {
       // this.treeData[0].checked = !this.treeData[0].checked
     },
     checked2(item) {
-      this.activeLabel = item.label
+      this.activeLabel = item.label;
     },
   },
   created() {

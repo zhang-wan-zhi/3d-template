@@ -1,50 +1,101 @@
 <template>
-  <div class="page">
-    <div class="btn-page">
-      <div :class="['btn', checked == 0 ? 'btn-active' : '']" @click="check(0)">
-        台站总况
-      </div>
-      <div :class="['btn', checked == 1 ? 'btn-active' : '']" @click="check(1)">
-        台站分布
-      </div>
+  <div>
+    <div class="cascader-home">
+      <cascader :data="data"></cascader>
     </div>
-    <!-- 台站总况 -->
-    <div class="total-case" v-if="checked == 0">
-      <echart-right></echart-right>
-    </div>
-    <div class="distribution" v-if="checked == 1">
-      <distribution></distribution>
-      <!-- <img src="../../assets/img/icon/page/Frame2.png" alt=""> -->
+    <div class="page">
+      <div class="btn-page">
+        <div
+          :class="['btn', checked == 0 ? 'btn-active' : '']"
+          @click="check(0)"
+        >
+          台站总况
+        </div>
+        <div
+          :class="['btn', checked == 1 ? 'btn-active' : '']"
+          @click="check(1)"
+        >
+          台站分布
+        </div>
+      </div>
+      <!-- 台站总况 -->
+      <div class="total-case" v-if="checked == 0">
+        <echart-right></echart-right>
+      </div>
+      <div class="distribution" v-if="checked == 1">
+        <distribution></distribution>
+        <!-- <img src="../../assets/img/icon/page/Frame2.png" alt=""> -->
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import EchartRight from '../../components/EchartRight/index.vue'
-import distribution from './components/distribution.vue'
+import EchartRight from "../../components/EchartRight/index.vue";
+import distribution from "./components/distribution.vue";
+import cascader from "../../components/cascader/index.vue";
 export default {
   components: {
     EchartRight,
-    distribution
+    distribution,
+    cascader,
   },
   data() {
     return {
       checked: 0,
+      data: [
+        {
+          label: "浙江省",
+          checked: true,
+          children: [
+            {
+              label: "杭州市",
+              checked: false,
+              children: [
+                {
+                  label: "西湖区",
+                  checked: false,
+                  children: [
+                    {
+                      label: "杭州老和山地震台",
+                      checked: false,
+                      children: [],
+                    },
+                    {
+                      label: "杭州植物园地震台",
+                      checked: false,
+                      children: [],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              label: "建德市",
+              checked: false,
+              children: [],
+            },
+          ],
+        },
+      ],
     };
   },
   methods: {
     check(e) {
       this.checked = e;
     },
-    
   },
-  mounted() {
-    
-  },
+  mounted() {},
 };
 </script>
 
 <style scoped lang="scss">
+.cascader-home {
+  position: absolute;
+  left: 72px;
+  top: 175px;
+  z-index: 999;
+}
 .page {
   position: absolute;
   display: flex;
@@ -53,6 +104,7 @@ export default {
   width: 350px;
   right: 72px;
   top: 173px;
+  z-index: 999;
   .btn-page {
     display: flex;
     width: 160px;
@@ -78,7 +130,6 @@ export default {
     margin-top: 12px;
     background: rgba(24, 23, 23, 0.6);
     border: 1px dashed #434343;
-    
   }
   .distribution {
     margin-top: 12px;

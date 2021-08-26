@@ -1,6 +1,10 @@
 <template>
   <div class="page-divree">
-    <load-modules v-if="showModules" @close="close"></load-modules>
+    <load-modules
+      v-if="showModules"
+      @close="close"
+      :model-file="modelFileName"
+    ></load-modules>
     <div class="table-hd">
       <!-- 表头 -->
       <div>序号</div>
@@ -18,7 +22,7 @@
     </div>
     <div class="th">
       <div class="mod">
-        <div class="floor-bg-wrapper" @click="showModules = true">
+        <div class="floor-bg-wrapper" @click="showModule('QB.fbx')">
           <span class="num">1</span> <span class="num-1">24140022</span>
           <span class="tag">UPS主机</span> <span class="label">通用</span>
           <span class="kva">1KVA</span>
@@ -34,7 +38,7 @@
     </div>
     <div class="th">
       <div class="mod">
-        <div class="floor-bg-wrapper">
+        <div class="floor-bg-wrapper" @click="showModule('3.fbx')">
           <span class="num">1</span> <span class="num-1">24140022</span>
           <span class="tag">UPS主机</span> <span class="label">通用</span>
           <span class="kva">1KVA</span>
@@ -50,7 +54,7 @@
     </div>
     <div class="th">
       <div class="mod">
-        <div class="floor-bg-wrapper">
+        <div class="floor-bg-wrapper" @click="showModule('yq2.fbx')">
           <span class="num">1</span> <span class="num-1">24140022</span>
           <span class="tag">UPS主机</span> <span class="label">通用</span>
           <span class="kva">1KVA</span>
@@ -100,21 +104,27 @@
 </template>
 
 <script>
-import LoadModules from '../../../components/LoadModules/index.vue'
+import LoadModules from "../../../components/LoadModules/index.vue";
 export default {
   components: {
-    LoadModules
+    LoadModules,
   },
   data() {
     return {
-      showModules: false
-    }
+      showModules: false,
+      modelFileName: "",
+    };
   },
   methods: {
     close() {
-      this.showModules = false
-    }
-  }
+      this.showModules = false;
+    },
+    showModule(e) {
+      /* this.showModules = true; */
+      /* this.modelFileName = e */
+      this.$router.push({ name: "modules", query: { moduleName: e } });
+    },
+  },
 };
 </script>
 
@@ -129,7 +139,7 @@ export default {
     background-color: rgba($color: #ccc, $alpha: 0.5);
   }
   .th {
-      margin-top: 16px;
+    margin-top: 16px;
     .mod {
       width: 1298px;
       height: 25px;

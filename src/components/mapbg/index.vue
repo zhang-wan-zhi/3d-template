@@ -1,6 +1,7 @@
 <template>
   <div id="WebGL-output">
     <Card v-if="showCard" @close="close" :station-name="stationName"></Card>
+    <!-- <div class="title one" ref="one">第一个盒子</div> -->
   </div>
 </template>
 <script>
@@ -8,6 +9,10 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Card from "../../components/card/index.vue";
+import {
+  CSS2DRenderer,
+  CSS2DObject,
+} from "three/examples/jsm/renderers/CSS2DRenderer.js";
 export default {
   name: "mapbg",
   components: {
@@ -15,19 +20,18 @@ export default {
   },
   data() {
     return {
-      scene: null,
-      camera: null,
-      renderer: null,
       cube: null,
       sphere: null,
       step: 0,
       stats: null,
       group: null,
-      width: 1920,
+      width: 0,
       height: 1080,
       modelUrl: "/models/QB.glb",
+      modelUrl2: "/models/DX1.glb",
       showCard: false,
       loadscene: null,
+      loadscene2: null,
       x: 10,
       y: 10,
       z: 10,
@@ -36,24 +40,19 @@ export default {
   },
   computed: {
     seismometry() {
-      /* this.loadscene.children[1].visible = true; */
-      console.log('111111222222');
-      /* if(this.$store.state.map.seismometry) {
-        this.loadscene.children[1].visible = true;
-      } else {
-        this.loadscene.children[1].visible = false;
-      } */
-      return this.$store.state.map.seismometry
-    }
+      // console.log("监听到vux改变了");
+      return this.$store.state.map.seismometry;
+    },
   },
   watch: {
     seismometry: function (value) {
-      if(value) {
+      if (value) {
         this.loadscene.children[2].visible = true;
       } else {
         this.loadscene.children[2].visible = false;
+        this.hiddenAllText();
       }
-    }
+    },
   },
   methods: {
     close() {
@@ -71,7 +70,17 @@ export default {
         0.2,
         1000
       );
-      this.camera.position.set(0, 100, 20);
+      /* this.camera.position.set(0, 100, 20); */
+      this.camera.position.set(0, 100, 50);
+
+      // 文字
+      self.labelRenderer = new CSS2DRenderer();
+      self.labelRenderer.setSize(this.width, this.height);
+      /* self.labelRenderer.domElement.style.position = "absolute"; */
+      /* self.labelRenderer.domElement.style.top = "0px"; */
+      document
+        .getElementById("WebGL-output")
+        .appendChild(self.labelRenderer.domElement);
 
       this.renderer = new THREE.WebGLRenderer({ antialias: true });
       this.renderer.setSize(this.width, this.height);
@@ -81,6 +90,8 @@ export default {
       this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
       // 色调映射的曝光级别。默认是1
       this.renderer.toneMappingExposure = 1;
+      this.renderer.domElement.style.position = "absolute";
+      this.renderer.domElement.style.top = "0px";
       //this.renderer.shadowMapEnabled = true;
       this.renderer.outputEncoding = THREE.sRGBEncoding;
       document
@@ -125,13 +136,6 @@ export default {
           });
           console.log(intersects[0].object.name, intersects[0].object.position);
         }
-
-        // 过滤网格和地面
-        /* const intersect = intersects.filter(
-          (intersect) =>
-            !(intersect.object instanceof GridHelper) &&
-            intersect.object.name !== "plane"
-        )[0]; */
       });
       // 坐标线
       /* let axes = new THREE.AxisHelper(100);
@@ -155,17 +159,35 @@ export default {
             object.castShadow = true;
           }
         });
-        
+
         console.log("Wuti", self.loadscene);
         // mesh方法
         // 4/5改变主体
         // loadscene.children[0].children[1].material.color.set(0xf10303);
-        self.loadscene.scale.set(13, 13, 13);
+        self.loadscene.scale.set(11, 11, 11);
         self.loadscene.rotation.set(0, 0, 0);
         self.loadscene.position.set(-10, 0, 0);
         console.log("self.loadscene", self.loadscene);
         self.scene.add(self.loadscene);
-        /* self.loaderImg(); */
+        self.showAllText();
+      });
+      loader1.load(this.modelUrl2, function (gltf2) {
+        console.log("gltf2", gltf2);
+        self.loadscene2 = gltf2.scene;
+        self.loadscene2.traverse(function (object) {
+          if (object.isMesh) {
+            let color = new THREE.Color(0x045526);
+            object.material.emissive = color;
+            object.material.emissiveIntensity = 0.6;
+            console.log("objectcolor", object);
+            object.castShadow = true;
+          }
+        });
+        self.loadscene2.scale.set(15, 15, 15);
+
+        self.loadscene2.position.set(0, -15, 0);
+
+        self.scene.add(self.loadscene2);
       });
     },
     loaderImg() {
@@ -252,12 +274,93 @@ export default {
 
       animate1();
     },
+    loadText() {
+      let self = this;
+      const loader = new THREE.FontLoader();
+      loader.load("/fonts/helvetiker_regular.typeface.json", function (font) {
+        const color = 0x006699;
+        const matLite = new THREE.MeshBasicMaterial({
+          color: color,
+          transparent: true,
+          opacity: 1,
+          side: THREE.DoubleSide,
+        });
+        const message = "tzzzzz";
+        const shapes = font.generateShapes(message, 20);
+        const geometry = new THREE.ShapeGeometry(shapes);
+        geometry.computeBoundingBox();
+        const xMid =
+          -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+        geometry.translate(xMid, 0, 0);
+        const text = new THREE.Mesh(geometry, matLite);
+
+        /* self.scene.add(text); */
+
+        self.loadscene.children[1].children.push(text);
+        text.position.set(0, 0, 0);
+        console.log("self.loadscene", self.loadscene);
+      }); //end load function
+    },
+    rendText() {
+      this.$refs.one.style.left = "200px";
+      console.log("zzzwww", this.$refs.one.style);
+    },
+    showAllText() {
+      let self = this;
+      self.loadscene.traverse(function (object) {
+        if (object.isMesh) {
+          if (object.name == "zhe" || object.name == "zhe_2") {
+            return;
+          } else {
+            const earthDiv = document.createElement("div");
+            earthDiv.className = "labelzwz";
+            earthDiv.textContent = object.name;
+            earthDiv.style.marginTop = "-20px";
+            const earthLabel = new CSS2DObject(earthDiv);
+            earthLabel.position.set(0, 0, 0);
+            object.add(earthLabel);
+          }
+        }
+      });
+    },
+    hiddenAllText() {
+      let self = this;
+      self.loadscene.traverse(function (object) {
+        if (object.isMesh) {
+          if (object.name == "zhe" || object.name == "zhe_2") {
+            return;
+          } else {
+            object.remove(object.children[0])
+            console.log(object);
+          }
+        }
+      });
+    },
     animate() {
       requestAnimationFrame(this.animate);
       this.renderer.render(this.scene, this.camera);
+      this.labelRenderer.render(this.scene, this.camera);
     },
   },
   mounted() {
+    // 初始化
+    this.scene = null;
+    this.renderer = null;
+    this.camera = null;
+    this.controls = null;
+    this.animationFrame = null;
+    this.circle = null;
+    this.helper = null;
+    this.labelRenderer = null;
+    
+    // 结束
+    /* 
+    let scaleRate =  baseWidth/1920
+    let bgStyle = document.getElementById('WebGL-output').style
+    this.width = `${baseWidth/scaleRate}` */
+    let baseWidth = document.documentElement.clientWidth;
+    let baseHeight = document.documentElement.clientHeight;
+    this.width = baseWidth * (1080 / baseHeight);
     window.ob = this;
     this.init();
     this.animate();
@@ -269,8 +372,12 @@ export default {
 <style>
 #WebGL-output {
   position: absolute;
-  width: 1920px;
-  height: 1080px;
   z-index: 9;
+}
+.labelzwz {
+  color: #fff;
+  padding: 2px;
+  background: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
 }
 </style>

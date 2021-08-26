@@ -55,7 +55,7 @@ export default {
       this.$emit("close");
     },
     interior() {
-      this.$router.push('stationInterior')
+      this.$router.push('house')
       this.closeCard()
     }
   },

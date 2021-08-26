@@ -1,5 +1,5 @@
 <template>
-  <div class="station-interior">
+  <div class="station-interior" id="interior">
     <dv-border-box-8 :dur="6">
       <div class="box-content">
         <div class="box-head">
@@ -61,11 +61,12 @@
           <div class="icon-shu"></div>
           <div
             :class="['nav-btn', page == 4 ? 'nav-btn-active' : '']"
-            @click="changePath"
+            @click="page = 4"
           >
             台站图片
           </div>
         </div>
+        
         <!-- center -->
         <div class="box-center" v-if="page === 1">
           <div class="left">
@@ -101,6 +102,7 @@ export default {
   data() {
     return {
       page: 1,
+      
     };
   },
   methods: {
@@ -118,12 +120,13 @@ export default {
   width: 1373px;
   height: 685px;
   top: 214px;
-  left: 380px;
+  left: 280px;
   z-index: 99;
   background: rgba(11, 11, 11, 0.4);
 }
 .box-content {
   padding: 26px 37px;
+  
 }
 .station-msg {
   display: flex;
@@ -186,5 +189,6 @@ export default {
   .right {
     margin-left: 118px;
   }
+  
 }
 </style>

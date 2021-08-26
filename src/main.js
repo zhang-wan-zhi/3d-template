@@ -11,6 +11,9 @@ import axios from 'axios';
 import {echartsSize} from './assets/js/util.js'
 import dataV from '@jiaminghi/data-view'
 import store from './store'
+import Progress from 'vue-multiple-progress'
+
+Vue.use(Progress)
 
 Vue.use(dataV)
 Vue.prototype.$echarts = echarts;

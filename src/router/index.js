@@ -9,7 +9,8 @@ const working = () => import("@/views/working/index.vue");
 const monitoring = () => import("@/views/monitoring/index.vue");
 const other = () => import("@/views/other/index.vue");
 const house = () => import("@/views/house/index.vue");
-
+const map = () => import("@/views/map/index.vue");
+const modules = () => import("@/views/modules/index.vue");
 
 Vue.use(Router);
 
@@ -58,13 +59,26 @@ export default new Router({
           meta: { name: "其他" },
           component: other,
         },
+        {
+          path: "/home/house",
+          name: "house",
+          meta: { name: "总览" },
+          component: house,
+        },
+        {
+          path: "/home/map",
+          name: "map",
+          meta: { name: "总览" },
+          component: map,
+        },
+        {
+          path: "/home/modules",
+          name: "modules",
+          meta: { name: "总览" },
+          component: modules,
+        },
       ],
     },
-    {
-      path: "/house",
-      name: "house",
-      meta: { name: "总览" },
-      component: house,
-    },
+    
   ],
 });

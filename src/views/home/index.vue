@@ -2,7 +2,6 @@
   <div class="operation">
     <div class="title">数字孪生智慧台站</div>
     <HeaderNav></HeaderNav>
-
     <router-view></router-view>
   </div>
 </template>
@@ -27,13 +26,14 @@ export default {
 <style lang="scss">
 .operation {
   position: relative;
-  width: 1920px;
-  height: 1080px;
+  width: 100%;
+  height: 100%;
   .title {
     position: absolute;
     height: 47px;
-    left: 72px;
+    left: 50%;
     top: 72px;
+    transform: translateX(-50%);
     color: #fff;
     letter-spacing: 2px;
     font-style: normal;

@@ -10,10 +10,10 @@
     <div class="progress" v-if="percentage !== 100">
       <div class="progress-item">
         <vm-progress
-        :percentage="percentage"
-        :text-inside="true"
-        :stroke-width="40"
-      ></vm-progress>
+          :percentage="percentage"
+          :text-inside="true"
+          :stroke-width="40"
+        ></vm-progress>
       </div>
     </div>
   </div>
@@ -26,7 +26,9 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { DDSLoader } from "three/examples/jsm/loaders/DDSLoader.js";
+import { Sky } from "three/examples/jsm/objects/Sky.js";
 import * as Nodes from "three/examples/jsm/nodes/Nodes.js";
+import { TDSLoader } from "three/examples/jsm/loaders/TDSLoader.js";
 export default {
   data() {
     return {
@@ -48,10 +50,36 @@ export default {
       modelName: "",
       height: 1000,
       width: 1000,
-      percentage: 0
+      percentage: 0,
     };
   },
   methods: {
+    loadSun() {
+      const sky = new Sky();
+      sky.scale.setScalar(10000);
+      this.scene.add(sky);
+      let sun = new THREE.Vector3();
+      const parameters = {
+        elevation: 2,
+        azimuth: 180,
+      };
+      const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+      const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
+      const theta = THREE.MathUtils.degToRad(parameters.azimuth);
+      const skyUniforms = sky.material.uniforms;
+
+      skyUniforms["turbidity"].value = 10;
+      skyUniforms["rayleigh"].value = 2;
+      skyUniforms["mieCoefficient"].value = 0.005;
+      skyUniforms["mieDirectionalG"].value = 0.8;
+
+      sun.setFromSphericalCoords(1, phi, theta);
+
+      sky.material.uniforms["sunPosition"].value.copy(sun);
+      /* water.material.uniforms["sunDirection"].value.copy(sun).normalize(); */
+
+      this.scene.environment = pmremGenerator.fromScene(sky).texture;
+    },
     init() {
       let self = this;
       self.clock = new THREE.Clock();
@@ -81,23 +109,31 @@ export default {
 
       // 场景允许你在什么地方、摆放什么东西来交给three.js来渲染，这是你放置物体、灯光和摄像机的地方。
       self.scene = new THREE.Scene();
-      self.scene.background = new THREE.Color(0x262626);
+      // 背景颜色
+      self.scene.background = new THREE.Color(0xd5d7d9);
       self.scene.environment = pmremGenerator.fromScene(
         new RoomEnvironment(),
         0.04
       ).texture;
 
       // 光线
-      /* const ambientlight = new THREE.AmbientLight(0x464646);
-      this.scene.add(ambientlight); */
+      const ambientlight = new THREE.AmbientLight(0xffffff, 1.2);
+      self.scene.add(ambientlight);
       // 光源直接放置于场景之上，光照颜色从天空光线颜色颜色渐变到地面光线颜色。
-      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
-      hemiLight.position.set(0, 1, 0);
-      self.scene.add(hemiLight);
+
+      // 点
+      let light = new THREE.PointLight(0xffffff, 1, 100);
+      light.position.set(10, 10, 0);
+      self.scene.add(light);
+
       // 平行光
-      const directionalLight = new THREE.DirectionalLight(0xffddcc, 1);
-      directionalLight.position.set(0, 0, 2);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+      directionalLight.position.set(10, 10, 10);
       self.scene.add(directionalLight);
+
+      /* let helper = new THREE.DirectionalLightHelper(directionalLight, 5);
+      this.scene.add(helper); */
+
       // （轨道控制器）可以使得相机围绕目标进行轨道运动。
       self.controls = new OrbitControls(self.camera, self.renderer.domElement);
       // 控制器的焦点，.object的轨道围绕它运行。 它可以在任何时候被手动更新，以更改控制器的焦点。
@@ -108,52 +144,25 @@ export default {
       self.controls.enableDamping = true;
       // 加载模型
       let fbxLoader = new FBXLoader();
-      const normal = new THREE.TextureLoader().load("/models/hight.jpg");
-
-      // MATERIAL 金属材质
-      let mtl = new Nodes.PhongNodeMaterial();
-      let defaultSide = THREE.FrontSide;
-      // 高光强度
-      var intensity = 1.5;
-      var power = new Nodes.FloatNode(3);
-      // 高光颜色
-      var color = new Nodes.ColorNode(0xffffff);
-      var viewZ = new Nodes.MathNode(
-        new Nodes.NormalNode(),
-        new Nodes.Vector3Node(0, 0, -intensity),
-        Nodes.MathNode.DOT
-      );
-      var rim = new Nodes.OperatorNode(
-        viewZ,
-        new Nodes.FloatNode(intensity),
-        Nodes.OperatorNode.ADD
-      );
-      var rimPower = new Nodes.MathNode(rim, power, Nodes.MathNode.POW);
-      var rimColor = new Nodes.OperatorNode(
-        rimPower,
-        color,
-        Nodes.OperatorNode.MUL
-      );
-      mtl.color = new Nodes.ColorNode(0x1a1716);
-      mtl.emissive = rimColor;
-      mtl.side = defaultSide;
 
       /*  mesh.material = mtl; */
-
       // 循环方法 添加金属质感
-      /* function _ChangeMaterialEmissive(parent) {
+      function _ChangeMaterialEmissive(parent) {
         parent.traverse(function (obj) {
           if (obj instanceof THREE.Mesh) {
-            
-            obj.material = mtl;
+            /* obj.material = mtl; */
+            /* if (obj.name == "圆柱_13_2") {
+              obj.material.color = new THREE.Color(1,0.8,0);
+            } */
+            /* obj.material.specular = new THREE.Color(1, 1, 1); */
           }
         });
-      } */
+      }
       // 加载进度
       function onProgress(xhr) {
         // 后台打印查看模型文件加载进度
-        self.percentage = Number((xhr.loaded / xhr.total) * 100)
-        console.log('self.percentage',self.percentage);
+        self.percentage = Number((xhr.loaded / xhr.total) * 100);
+        console.log("self.percentage", self.percentage);
         console.log("加载完成的百分比" + (xhr.loaded / xhr.total) * 100);
       }
 
@@ -161,7 +170,7 @@ export default {
         self.modelPath2,
         function (object) {
           self.object = object;
-          /* _ChangeMaterialEmissive(self.object); */
+          _ChangeMaterialEmissive(self.object);
           console.log("objzwz", object);
           self.moduleSize(self.object);
           self.loading = false;
@@ -245,6 +254,8 @@ export default {
         if (intersects.length > 0) {
           /* self.close() */
           self.modelName = intersects[0].object.name;
+          /* intersects[0].object.material.specular = new THREE.Color(1, 1, 1)
+          intersects[0].object.material.color = intersects[0].object.material.specular */
           console.log(intersects[0].object);
         }
 
@@ -259,7 +270,7 @@ export default {
     play() {
       /* this.mixer.clipAction(this.object.animations[0]).play();
       this.animate2(); */
-      
+
       this.renderEnabled = true;
       this.animation = this.mixer.clipAction(this.object.animations[0]);
       /* console.log("THREE.LoopOnce", animation); */
@@ -279,7 +290,7 @@ export default {
       this.animation.paused = false;
       this.animation.play();
       this.animation.time = this.animationTime / 2;
-      this.object.animations[0].duration = this.animationTime //操作对象设置开始播放时间
+      this.object.animations[0].duration = this.animationTime; //操作对象设置开始播放时间
     },
     animate() {
       this.animateFrame2 = requestAnimationFrame(this.animate);
@@ -335,7 +346,7 @@ export default {
     this.animationTime = null;
     // 结束
     this.init();
-    this.loadImg();
+    /* this.loadImg(); */
     this.addEvent();
     this.animate();
   },
@@ -364,7 +375,7 @@ export default {
     left: 50%;
     transform: translate(-50%, 0);
   }
-  .progress{
+  .progress {
     position: absolute;
     width: 100%;
     height: 100%;

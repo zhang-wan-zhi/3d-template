@@ -309,7 +309,7 @@ export default {
       let self = this;
       self.loadscene.traverse(function (object) {
         if (object.isMesh) {
-          if (object.name == "zhe" || object.name == "zhe_2") {
+          if (object.name == "zhe" || object.name == "zhe_2" || object.name == "jie") {
             return;
           } else {
             const earthDiv = document.createElement("div");
@@ -379,5 +379,8 @@ export default {
   padding: 2px;
   background: rgba(0, 0, 0, 0.6);
   cursor: pointer;
+}
+.labelzwz:hover {
+  background-color: rgba(172, 16, 16, 0.6);
 }
 </style>

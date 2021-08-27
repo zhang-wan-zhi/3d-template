@@ -22,23 +22,7 @@
     </div>
     <div class="th">
       <div class="mod">
-        <div class="floor-bg-wrapper" @click="showModule('QB.fbx')">
-          <span class="num">1</span> <span class="num-1">24140022</span>
-          <span class="tag">UPS主机</span> <span class="label">通用</span>
-          <span class="kva">1KVA</span>
-          <span class="tel">100617-26260019</span>
-          <span class="word">山特</span> <span class="tag-1">否</span>
-          <span class="label-1">2016/12/19 10:00:00</span>
-          <img
-            class="floor-bg"
-            src="https://ai-sample.oss-cn-hangzhou.aliyuncs.com/figma-plugin/57ce7c50fc2d11eb976b09b058188bbc.png"
-          />
-        </div>
-      </div>
-    </div>
-    <div class="th">
-      <div class="mod">
-        <div class="floor-bg-wrapper" @click="showModule('3.fbx')">
+        <div class="floor-bg-wrapper" @click="showModule('yq1.fbx')">
           <span class="num">1</span> <span class="num-1">24140022</span>
           <span class="tag">UPS主机</span> <span class="label">通用</span>
           <span class="kva">1KVA</span>
@@ -70,7 +54,23 @@
     </div>
     <div class="th">
       <div class="mod">
-        <div class="floor-bg-wrapper">
+        <div class="floor-bg-wrapper" @click="showModule('yq3.fbx')">
+          <span class="num">1</span> <span class="num-1">24140022</span>
+          <span class="tag">UPS主机</span> <span class="label">通用</span>
+          <span class="kva">1KVA</span>
+          <span class="tel">100617-26260019</span>
+          <span class="word">山特</span> <span class="tag-1">否</span>
+          <span class="label-1">2016/12/19 10:00:00</span>
+          <img
+            class="floor-bg"
+            src="https://ai-sample.oss-cn-hangzhou.aliyuncs.com/figma-plugin/57ce7c50fc2d11eb976b09b058188bbc.png"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="th">
+      <div class="mod">
+        <div class="floor-bg-wrapper" @click="showModule('yq4.fbx')">
           <span class="num">1</span> <span class="num-1">24140022</span>
           <span class="tag">UPS主机</span> <span class="label">通用</span>
           <span class="kva">1KVA</span>

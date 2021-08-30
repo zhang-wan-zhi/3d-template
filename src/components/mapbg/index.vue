@@ -47,9 +47,10 @@ export default {
   watch: {
     seismometry: function (value) {
       if (value) {
-        this.loadscene.children[2].visible = true;
+        /* this.loadscene.children[2].visible = true; */
+        this.showAllText()
       } else {
-        this.loadscene.children[2].visible = false;
+        /* this.loadscene.children[2].visible = false; */
         this.hiddenAllText();
       }
     },
@@ -169,7 +170,7 @@ export default {
         self.loadscene.position.set(-10, 0, 0);
         console.log("self.loadscene", self.loadscene);
         self.scene.add(self.loadscene);
-        self.showAllText();
+        /* self.showAllText(); */
       });
       loader1.load(this.modelUrl2, function (gltf2) {
         console.log("gltf2", gltf2);

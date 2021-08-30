@@ -1,13 +1,13 @@
 const state = {
-    seismometry: true,
+    seismometry: false,
     strongShock: true,
     gnssStatus: true,
     omen: true
 }
 
 const mutations = {
-    change_Seismometry: state => {
-        state.seismometry = !state.seismometry
+    change_Seismometry: (state,e) => {
+        state.seismometry = e
     },
     change_StrongShock: state => {
         state.strongShock = !state.strongShock

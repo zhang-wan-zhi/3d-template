@@ -12,6 +12,8 @@ import {echartsSize} from './assets/js/util.js'
 import dataV from '@jiaminghi/data-view'
 import store from './store'
 import Progress from 'vue-multiple-progress'
+import animated from 'animate.css' // npm install animate.css --save安装，再引入
+Vue.use(animated)
 
 Vue.use(Progress)
 

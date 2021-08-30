@@ -1,10 +1,12 @@
 <template>
   <div>
     <div class="cascader-home">
-      <cascader :data="data"></cascader>
+      <!-- <cascader :data="data"></cascader> -->
+      <stationsort></stationsort>
     </div>
     <div class="page">
-      <div class="btn-page">
+      <timemessage></timemessage>
+      <!-- <div class="btn-page">
         <div
           :class="['btn', checked == 0 ? 'btn-active' : '']"
           @click="check(0)"
@@ -17,15 +19,14 @@
         >
           台站分布
         </div>
-      </div>
+      </div> -->
       <!-- 台站总况 -->
-      <div class="total-case" v-if="checked == 0">
+      <!-- <div class="total-case">
         <echart-right></echart-right>
-      </div>
-      <div class="distribution" v-if="checked == 1">
+      </div> -->
+     <!--  <div class="distribution" v-if="checked == 1">
         <distribution></distribution>
-        <!-- <img src="../../assets/img/icon/page/Frame2.png" alt=""> -->
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -33,12 +34,16 @@
 <script>
 import EchartRight from "../../components/EchartRight/index.vue";
 import distribution from "./components/distribution.vue";
+import stationsort from "./components/stationsort.vue";
+import timemessage from "./components/timemessage.vue";
 import cascader from "../../components/cascader/index.vue";
 export default {
   components: {
     EchartRight,
     distribution,
     cascader,
+    stationsort,
+    timemessage
   },
   data() {
     return {

@@ -1,17 +1,19 @@
 <template>
   <div class="operation">
-    <div class="title">数字孪生智慧台站</div>
-    <HeaderNav></HeaderNav>
+    <div class="title"><img src="../../assets/img/nav/Component4.png" alt=""></div>
+    <Navigation></Navigation>
     <router-view></router-view>
   </div>
 </template>
 
 <script>
 import HeaderNav from "./components/header";
+import Navigation from "./components/navigation";
 
 export default {
   components: {
     HeaderNav,
+    Navigation
   },
   data() {
     return {};
@@ -32,7 +34,7 @@ export default {
     position: absolute;
     height: 47px;
     left: 50%;
-    top: 72px;
+    top: 50px;
     transform: translateX(-50%);
     color: #fff;
     letter-spacing: 2px;

@@ -1,5 +1,5 @@
 <template>
-  <div class="stationsort">
+  <div class="stationsort animate__animated animate__bounceInLeft">
     <div class="ss-item">
       <div class="ss-title">测震</div>
       <div class="ss-nums">

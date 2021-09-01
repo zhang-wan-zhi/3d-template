@@ -48,7 +48,7 @@ export default {
     seismometry: function (value) {
       if (value) {
         /* this.loadscene.children[2].visible = true; */
-        this.showAllText()
+        this.showAllText();
       } else {
         /* this.loadscene.children[2].visible = false; */
         this.hiddenAllText();
@@ -77,8 +77,6 @@ export default {
       // 文字
       self.labelRenderer = new CSS2DRenderer();
       self.labelRenderer.setSize(this.width, this.height);
-      /* self.labelRenderer.domElement.style.position = "absolute"; */
-      /* self.labelRenderer.domElement.style.top = "0px"; */
       document
         .getElementById("WebGL-output")
         .appendChild(self.labelRenderer.domElement);
@@ -99,11 +97,11 @@ export default {
         .getElementById("WebGL-output")
         .appendChild(this.renderer.domElement);
 
-      let orbitcontrols = new OrbitControls(
+      this.controls = new OrbitControls(
         this.camera,
         this.renderer.domElement
       );
-
+      this.controls.maxPolarAngle = Math.PI * 0.5;
       this.renderer.domElement.addEventListener("click", (event) => {
         /* self.showCard = false */
 
@@ -141,12 +139,37 @@ export default {
       // 坐标线
       /* let axes = new THREE.AxisHelper(100);
       this.scene.add(axes); */
-      let ambientLight = new THREE.AmbientLight(0x0c0c0c, 4);
+      let ambientLight = new THREE.AmbientLight(0x0c0c0c, 1);
       this.scene.add(ambientLight);
 
       let dirlight = new THREE.DirectionalLight(0xdfebff, 1);
       dirlight.position.set(20, 20, 20);
       this.scene.add(dirlight);
+
+      /* let light = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
+      this.scene.add(light); */
+
+      const loader = new THREE.TextureLoader();
+      const groundTexture = loader.load("/models/bg.png");
+      groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+      groundTexture.repeat.set(25, 25);
+      groundTexture.anisotropy = 16;
+      groundTexture.encoding = THREE.sRGBEncoding;
+
+      const groundMaterial = new THREE.MeshLambertMaterial({
+        map: groundTexture,
+      });
+
+      
+
+      let mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(1200, 1200),
+        groundMaterial
+      );
+      mesh.position.y = -50;
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.receiveShadow = true;
+      this.scene.add(mesh);
     },
     loadModel() {
       let self = this; //这一点很重要。。
@@ -158,6 +181,15 @@ export default {
         self.loadscene.traverse(function (object) {
           if (object.isMesh) {
             object.castShadow = true;
+            object.material.opacity = 1
+            object.material.transparent = true;
+            object.material.colorWrite = true
+            object.material.flatShading = true
+            if (object.name == "jie") {
+              // 改变主体颜色
+              /* object.material.color = new THREE.Color(0x8E9A87) */
+              object.material.emissive = new THREE.Color(0x2c8c21)
+            }
           }
         });
 
@@ -234,26 +266,10 @@ export default {
         51.433692932128906,
         -0.1852910816669464
       );
-      /* mesh.rotation.set(0, 0.6, 0.6); */
 
-      // 先获取geometey的中心点位置并留存
-      /* let center = new THREE.Vector3();
-      mesh.geometry.computeBoundingBox();
-      mesh.geometry.boundingBox.getCenter(center);
-      let x = center.x;
-      let y = center.y;
-      let z = center.z; */
-
-      // 把对象放到坐标原点
-      /*  mesh.geometry.center(); */
-
-      // 绕轴旋转
-      /* mesh.geometry.rotateY(180); */
       mesh.rotation.set(-80, 0, 0);
 
-      // 再把对象放回原来的地方
-      /* mesh.geometry.translate(x, y, z);
-      console.log(mesh); */
+
 
       this.loadscene.children[2].add(mesh);
       console.log("this.loadscene", this.loadscene);
@@ -310,7 +326,11 @@ export default {
       let self = this;
       self.loadscene.traverse(function (object) {
         if (object.isMesh) {
-          if (object.name == "zhe" || object.name == "zhe_2" || object.name == "jie") {
+          if (
+            object.name == "zhe" ||
+            object.name == "zhe_2" ||
+            object.name == "jie"
+          ) {
             return;
           } else {
             const earthDiv = document.createElement("div");
@@ -331,7 +351,7 @@ export default {
           if (object.name == "zhe" || object.name == "zhe_2") {
             return;
           } else {
-            object.remove(object.children[0])
+            object.remove(object.children[0]);
             console.log(object);
           }
         }
@@ -353,7 +373,7 @@ export default {
     this.circle = null;
     this.helper = null;
     this.labelRenderer = null;
-    
+
     // 结束
     /* 
     let scaleRate =  baseWidth/1920
@@ -383,5 +403,6 @@ export default {
 }
 .labelzwz:hover {
   background-color: rgba(172, 16, 16, 0.6);
+  /* background-color: rgb(53, 84, 224); */
 }
 </style>

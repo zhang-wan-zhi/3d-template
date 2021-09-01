@@ -1,5 +1,5 @@
 <template>
-  <div class="cascader">
+  <div class="cascader animate__animated animate__bounceInLeft">
     <div class="active-line">
       <dv-decoration-4 style="width: 5px; height: 130px; z-index: 9999" />
       <img src="../../assets/img/icon/cascader/Vector37.png" alt="" />

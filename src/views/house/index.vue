@@ -1,10 +1,11 @@
 <template>
   <div id="web-house">
+    <loading v-if="loading"></loading>
     <station-interior v-show="showInterior"></station-interior>
     <div class="info">
       <div class="info1" @click="showInterior = !showInterior">站台信息</div>
       <div class="info1">
-        <div class="text">漫游:</div>
+        <div class="text">仪器位置:</div>
         <el-switch v-model="value" active-color="#13ce66"> </el-switch>
       </div>
     </div>
@@ -16,15 +17,22 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import Card from "../../components/card/index.vue";
+import loading from "../../components/loading/index.vue";
 import { GUI } from "three/examples/jsm/libs/dat.gui.module.js";
 import { Water } from "three/examples/jsm/objects/Water.js";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
 import stationInterior from "../stationInterior/index.vue";
+import {
+  CSS2DRenderer,
+  CSS2DObject,
+} from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import TWEEN from "@tweenjs/tween.js";
 export default {
   name: "mapbg",
   components: {
     Card,
     stationInterior,
+    loading,
   },
   data() {
     return {
@@ -36,9 +44,11 @@ export default {
       width: 1920,
       height: 1080,
       modelPathGLB: "/models/tz.glb",
-      modelPathFbk: "/models/FK1.fbx",
+      modelPathFbx: "/models/tz/3.fbx",
+      modelPathFbx2: "/models/FK1.fbx",
       showCard: false,
       loadscene: null,
+      labelRenderer: null,
       x: 10,
       y: 10,
       z: 10,
@@ -48,21 +58,51 @@ export default {
       value: false,
       fn2: null,
       modelFileName: "",
+      tzObject: null,
+      loading: true,
     };
   },
   computed: {},
   watch: {
     value: function (newvalue, oldvalue) {
+      let oldP = {
+        x: 800,
+        y: 250,
+        z: 1500,
+      };
+      let oldT = {
+        x: 0,
+        y: 0,
+        z: 0,
+      };
+      let newP = {
+        x: 1200,
+        y: 500,
+        z: -1000,
+      };
+      let newT = {
+        x: 100,
+        y: 0,
+        z: -800,
+      };
       if (newvalue) {
-        this.raom();
+        /* this.raom();
         this.addEvent(newvalue);
-        this.addClickEvent(newvalue);
+        this.addClickEvent(newvalue); */
+        this.showModelName();
+
+        this.animateCamera(oldP, oldT, newP, newT);
+        /* this.camera.position.set(1200, 500, -1000);
+        this.controls.target = new THREE.Vector3(100, 0, -800); */
       } else {
-        this.camera.position.set(15, 15, 50);
+        this.hiddenModelText();
+        /* this.camera.position.set(800, 250, 1500);
+        this.controls.target = new THREE.Vector3(0, 0, 0); */
+        this.animateCamera(newP, newT, oldP, oldT);
+        /* this.camera.position.set(15, 15, 50);
         this.controls.target = new THREE.Vector3(0, 0, 0);
-        /* this.controls.update(); */
         this.addEvent(newvalue);
-        this.addClickEvent(newvalue);
+        this.addClickEvent(newvalue); */
       }
     },
   },
@@ -70,6 +110,51 @@ export default {
     close() {
       console.log("1111");
       this.showCard = false;
+    },
+    // oldP  相机原来的位置
+    // oldT  target原来的位置
+    // newP  相机新的位置
+    // newT  target新的位置
+    // callBack  动画结束时的回调函数
+    animateCamera(oldP, oldT, newP, newT, callBack) {
+      let self = this;
+      let tween = new TWEEN.Tween({
+        x1: oldP.x, // 相机x
+        y1: oldP.y, // 相机y
+        z1: oldP.z, // 相机z
+        x2: oldT.x, // 控制点的中心点x
+        y2: oldT.y, // 控制点的中心点y
+        z2: oldT.z, // 控制点的中心点z
+      });
+      tween.to(
+        {
+          x1: newP.x,
+          y1: newP.y,
+          z1: newP.z,
+          x2: newT.x,
+          y2: newT.y,
+          z2: newT.z,
+        },
+        1000
+      );
+      tween.onUpdate(function (object) {
+        self.camera.position.x = object.x1;
+        self.camera.position.y = object.y1;
+        self.camera.position.z = object.z1;
+        self.controls.target.x = object.x2;
+        self.controls.target.y = object.y2;
+        self.controls.target.z = object.z2;
+        self.controls.update();
+      });
+      tween.onComplete(function () {
+        self.controls.enabled = true;
+        callBack && callBack();
+      });
+      tween.easing(TWEEN.Easing.Cubic.InOut);
+      tween.start();
+    },
+    createCanvas() {
+      
     },
     init() {
       let self = this;
@@ -107,7 +192,13 @@ export default {
       dirlight.shadow.camera.far = 1000;
       this.scene.add(dirlight);
 
-
+      // 文字渲染
+      self.labelRenderer = new CSS2DRenderer();
+      self.labelRenderer.setSize(this.width, this.height);
+      document
+        .getElementById("web-house")
+        .appendChild(self.labelRenderer.domElement);
+      // webgl渲染
       this.renderer = new THREE.WebGLRenderer({ antialias: true });
       this.renderer.setSize(this.width, this.height);
       // 设置设备像素比。通常用于避免HiDPI设备上绘图模糊
@@ -116,6 +207,8 @@ export default {
       this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
       // 色调映射的曝光级别。默认是1
       this.renderer.toneMappingExposure = 1;
+      this.renderer.domElement.style.position = "absolute";
+      this.renderer.domElement.style.top = "0px";
       //this.renderer.shadowMapEnabled = true;
       this.renderer.outputEncoding = THREE.sRGBEncoding;
       document
@@ -124,12 +217,11 @@ export default {
       this.clock = new THREE.Clock();
 
       this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-      /* this.controls.listenToKeyEvents( window );
+      this.controls.listenToKeyEvents(window);
       this.controls.controlsenablePan = true;
-      this.controls.enabled = true
-      this.controls.enableKeys = true */
-      self.sun = new THREE.Vector3();
-
+      this.controls.enabled = true;
+      this.controls.enableKeys = true;
+      this.controls.maxPolarAngle = Math.PI * 0.5;
       // ground
       const loader = new THREE.TextureLoader();
       const groundTexture = loader.load("/models/grasslight-big.jpg");
@@ -142,6 +234,8 @@ export default {
         map: groundTexture,
       });
 
+      
+
       let mesh = new THREE.Mesh(
         new THREE.PlaneGeometry(20000, 20000),
         groundMaterial
@@ -151,7 +245,6 @@ export default {
       mesh.receiveShadow = true;
       this.scene.add(mesh);
 
-
       // 坐标线
       /* let axes = new THREE.AxesHelper(100);
       this.scene.add(axes); */
@@ -160,8 +253,7 @@ export default {
       let self = this; //这一点很重要。。
       let loader1 = new GLTFLoader();
       loader1.load(this.modelPathGLB, function (gltf) {
-
-        console.log('gltf',gltf);
+        console.log("gltf", gltf);
         self.loadscene = gltf.scene;
         self.loadscene.traverse(function (object) {
           if (object.isMesh) {
@@ -180,11 +272,52 @@ export default {
       let fbxLoader = new FBXLoader();
 
       /* const path = require("../../../public/models/FK.fbx"); */
-      fbxLoader.load(self.modelPathFbk, function (object) {
+      fbxLoader.load(
+        self.modelPathFbx,
+        function (object) {
+          console.log(object);
+          object.position.set(0, 0, 0);
+          object.scale.set(0.1, 0.1, 0.1);
+          self.scene.add(object);
+        },
+        onProgress
+      );
+      // 加载进度
+      function onProgress(xhr) {
+        // 后台打印查看模型文件加载进度
+        if (xhr.loaded == xhr.total) {
+          self.loading = false;
+        }
+      }
+      fbxLoader.load(self.modelPathFbx2, function (object) {
+        self.tzObject = object;
         console.log(object);
-        object.position.set(100, 0, 0);
-        object.scale.set(5, 5, 5);
-        self.scene.add(object);
+        self.tzObject.position.set(100, 0, -800);
+        self.tzObject.scale.set(3, 3, 3);
+        self.scene.add(self.tzObject);
+      });
+    },
+    showModelName() {
+      let self = this;
+      self.tzObject.traverse(function (object) {
+        if (object.isMesh) {
+          const earthDiv = document.createElement("div");
+          earthDiv.className = "labelzwz";
+          earthDiv.textContent = object.name;
+          earthDiv.style.marginTop = "-20px";
+          earthDiv.addEventListener("click", self.showModel, false);
+          const earthLabel = new CSS2DObject(earthDiv);
+          earthLabel.position.set(0, 0, 0);
+          object.add(earthLabel);
+        }
+      });
+    },
+    hiddenModelText() {
+      let self = this;
+      self.tzObject.traverse(function (object) {
+        if (object.isMesh) {
+          object.remove(object.children[0]);
+        }
       });
     },
     loadCircle() {
@@ -281,10 +414,16 @@ export default {
         self.renderer.domElement.removeEventListener("click", self.fn2, true);
       }
     },
+    showModel(e) {
+      console.log("1111", e.target.innerText);
+      this.$router.push({ name: "modules", query: { moduleName: "yq3.fbx" } });
+    },
     animate() {
       this.animationFrame = requestAnimationFrame(this.animate);
       this.controls.update();
       this.renderer.render(this.scene, this.camera);
+      this.labelRenderer.render(this.scene, this.camera);
+      TWEEN.update();
     },
     raom() {
       this.camera.position.set(-4.4, 1.6, 20.9);
@@ -301,16 +440,19 @@ export default {
     this.circle = null;
     this.helper = null;
     this.clock = null;
+    this.tween = null;
+    this.canvas = null;
     // 结束
     window.ob = this;
     let baseWidth = document.documentElement.clientWidth;
     let baseHeight = document.documentElement.clientHeight;
     this.width = baseWidth * (1080 / baseHeight);
-
+    this.createCanvas();
     this.init();
     this.animate();
     this.loadCircle();
     this.loadModelFbx();
+
     /* this.loadModel() */
   },
   beforeDestroy() {
@@ -356,4 +498,11 @@ export default {
     }
   }
 }
+.labelzwz {
+  color: #fff;
+  padding: 2px;
+  background: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+}
+
 </style>

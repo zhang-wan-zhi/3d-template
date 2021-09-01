@@ -1,6 +1,6 @@
 <template>
   <div class="navigation animate__animated animate__bounceInUp">
-     <!--  <h1 class="animate__animated animate__fadeInUp">
+    <!--  <h1 class="animate__animated animate__fadeInUp">
 Animate.css //class内不管是用哪个动画效果，animate__animated都一定要放，不然可能不会有想要的效果，后面那个便是要使用的动画类名，若要无限使用效果就加个infinite类名
 </h1> -->
     <div class="btn" @click="hidenText">
@@ -16,14 +16,16 @@ Animate.css //class内不管是用哪个动画效果，animate__animated都一�
 
 <script>
 export default {
-    methods:{
-        showText() {
-            this.$store.commit('map/change_Seismometry',true)
-        },
-        hidenText() {
-            this.$store.commit('map/change_Seismometry',false)
-        }
-    }
+  methods: {
+    showText() {
+      this.$router.push({ name: "page" });
+      this.$store.commit("map/change_Seismometry", true);
+    },
+    hidenText() {
+      this.$router.push({ name: "page" });
+      this.$store.commit("map/change_Seismometry", false);
+    },
+  },
 };
 </script>
 
@@ -54,12 +56,11 @@ export default {
       padding: 4px;
       top: 50%;
       left: 50%;
-      transform: translate(-50%,-50%);
+      transform: translate(-50%, -50%);
     }
     .text:hover {
-    background-color: rgba(0, 0, 0, 0.3);
+      background-color: rgba(0, 0, 0, 0.3);
+    }
   }
-  }
-  
 }
 </style>

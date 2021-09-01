@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <mapbg></mapbg>
+    <mapbg v-if="showMap"></mapbg>
     <router-view />
   </div>
 </template>
@@ -10,14 +10,31 @@ import { refreshScale } from "./assets/js/util";
 import mapbg from "./components/mapbg/index.vue";
 export default {
   components: {
-    mapbg
+    mapbg,
   },
   name: "app",
+  data() {
+    return {
+      showMap: true,
+    };
+  },
   mounted() {
     refreshScale();
     window.onresize = function () {
       refreshScale();
     };
+  },
+  watch: {
+    $route: {
+      handler: function (val, oldVal) {
+        console.log("router", val);
+        if (val.name !== "page") {
+          this.showMap = false;
+        } else {
+          this.showMap = true;
+        }
+      },
+    },
   },
 };
 </script>

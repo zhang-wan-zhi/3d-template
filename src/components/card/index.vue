@@ -16,7 +16,7 @@
     <div class="line2">UPS电池安装日期：2011-03-01</div>
     <div class="btn-station" @click="interior">
       <i class="el-icon-office-building"></i>
-      <span>台站内部</span>
+      <span>台站详情</span>
     </div>
     <div class="line3"></div>
     <div class="site">浙大玉泉校区</div>

@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="cascader-home">
-      <!-- <cascader :data="data"></cascader> -->
-      <stationsort></stationsort>
+      <cascader :data="data" v-if="seismometry"></cascader>
+      <stationsort v-else></stationsort>
     </div>
     <div class="page">
       <timemessage></timemessage>
@@ -84,6 +84,12 @@ export default {
         },
       ],
     };
+  },
+  computed: {
+    seismometry() {
+      // console.log("监听到vux改变了");
+      return this.$store.state.map.seismometry;
+    },
   },
   methods: {
     check(e) {

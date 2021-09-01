@@ -7,7 +7,7 @@
     </div>
     <i class="el-icon-close" @click="closeCard"></i>
     <!-- <i class="el-icon-loading" v-if="loading"></i> -->
-    <div class="progress" v-if="percentage !== 100">
+    <div class="progress" v-if="loading">
       <div class="progress-item">
         <vm-progress
           :percentage="percentage"
@@ -28,6 +28,11 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { DDSLoader } from "three/examples/jsm/loaders/DDSLoader.js";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
 import * as Nodes from "three/examples/jsm/nodes/Nodes.js";
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
 import { TDSLoader } from "three/examples/jsm/loaders/TDSLoader.js";
 export default {
   data() {
@@ -51,6 +56,8 @@ export default {
       height: 1000,
       width: 1000,
       percentage: 0,
+      selectedObjects: [],
+      outlinePass: null,
     };
   },
   methods: {
@@ -158,22 +165,58 @@ export default {
           }
         });
       }
+      // 边框
+      self.composer = new EffectComposer(self.renderer);
+
+      let renderPass = new RenderPass(self.scene, self.camera);
+      self.composer.addPass(renderPass);
+      self.outlinePass = new OutlinePass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        self.scene,
+        self.camera
+      );
+      // 参数设置
+      self.outlinePass.edgeStrength = 3;
+      self.outlinePass.edgeGlow = 1;
+      self.outlinePass.edgeThickness = 1;
+      self.outlinePass.pulsePeriod = 0;
+      self.outlinePass.usePatternTexture = false;
+      self.outlinePass.visibleEdgeColor = new THREE.Color(1, 0, 0);
+      self.outlinePass.hiddenEdgeColor = new THREE.Color(1, 0, 0);
+      //
+      self.composer.addPass(self.outlinePass);
+      let effectFXAA = new ShaderPass(FXAAShader);
+      effectFXAA.uniforms["resolution"].value.set(
+        1 / window.innerWidth,
+        1 / window.innerHeight
+      );
+      self.composer.addPass(effectFXAA);
+
       // 加载进度
       function onProgress(xhr) {
         // 后台打印查看模型文件加载进度
-        self.percentage = Number((xhr.loaded / xhr.total) * 100);
-        console.log("self.percentage", self.percentage);
-        console.log("加载完成的百分比" + (xhr.loaded / xhr.total) * 100);
+        self.percentage = Math.floor(Number((xhr.loaded / xhr.total) * 100));
+        if (xhr.loaded == xhr.total) {
+          self.percentage = 100;
+          self.loading = false;
+        }
+        /* console.log("self.percentage", self.percentage);
+        console.log("加载完成的百分比" + (xhr.loaded / xhr.total) * 100); */
       }
 
       fbxLoader.load(
         self.modelPath2,
         function (object) {
           self.object = object;
+          // 边框
+          self.outlinePass.patternTexture = self.object;
+          self.object.wrapS = THREE.RepeatWrapping;
+          self.object.wrapT = THREE.RepeatWrapping;
+
           _ChangeMaterialEmissive(self.object);
           console.log("objzwz", object);
           self.moduleSize(self.object);
-          self.loading = false;
+
           self.mixer = new THREE.AnimationMixer(self.object);
           self.animationTime = self.object.animations[0].duration;
         },
@@ -257,6 +300,15 @@ export default {
           /* intersects[0].object.material.specular = new THREE.Color(1, 1, 1)
           intersects[0].object.material.color = intersects[0].object.material.specular */
           console.log(intersects[0].object);
+          // 边框
+          function addSelectedObject(object) {
+            self.selectedObjects = [];
+            self.selectedObjects.push(object);
+          }
+          let selectedObject = intersects[0].object;
+          addSelectedObject(selectedObject);
+          self.outlinePass.selectedObjects = self.selectedObjects;
+          // 边框
         }
 
         // 过滤网格和地面
@@ -299,6 +351,7 @@ export default {
       this.mixer.update(delta); */
       this.renderer.render(this.scene, this.camera);
       this.renderer.clearDepth();
+      this.composer.render();
     },
     animate2() {
       this.animateFrame = requestAnimationFrame(this.animate2);
@@ -344,6 +397,7 @@ export default {
     this.camera = null;
     this.controls = null;
     this.animationTime = null;
+    this.composer = null;
     // 结束
     this.init();
     /* this.loadImg(); */

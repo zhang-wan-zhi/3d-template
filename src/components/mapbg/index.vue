@@ -13,6 +13,7 @@ import {
   CSS2DRenderer,
   CSS2DObject,
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import TWEEN from "@tweenjs/tween.js";
 export default {
   name: "mapbg",
   components: {
@@ -46,12 +47,34 @@ export default {
   },
   watch: {
     seismometry: function (value) {
+      let oldP = {
+        x: 0,
+        y: 100,
+        z: 50,
+      };
+      let oldT = {
+        x: 0,
+        y: 0,
+        z: 0,
+      };
+      let newP = {
+        x: 0,
+        y: 40,
+        z: 80,
+      };
+      let newT = {
+        x: 0,
+        y: 0,
+        z: 0,
+      };
       if (value) {
         /* this.loadscene.children[2].visible = true; */
         this.showAllText();
+        this.animateCamera(oldP, oldT, newP, newT);
       } else {
         /* this.loadscene.children[2].visible = false; */
         this.hiddenAllText();
+        this.animateCamera(newP, newT, oldP, oldT);
       }
     },
   },
@@ -59,6 +82,43 @@ export default {
     close() {
       console.log("1111");
       this.showCard = false;
+    },
+    animateCamera(oldP, oldT, newP, newT, callBack) {
+      let self = this;
+      let tween = new TWEEN.Tween({
+        x1: oldP.x, // 相机x
+        y1: oldP.y, // 相机y
+        z1: oldP.z, // 相机z
+        x2: oldT.x, // 控制点的中心点x
+        y2: oldT.y, // 控制点的中心点y
+        z2: oldT.z, // 控制点的中心点z
+      });
+      tween.to(
+        {
+          x1: newP.x,
+          y1: newP.y,
+          z1: newP.z,
+          x2: newT.x,
+          y2: newT.y,
+          z2: newT.z,
+        },
+        1000
+      );
+      tween.onUpdate(function (object) {
+        self.camera.position.x = object.x1;
+        self.camera.position.y = object.y1;
+        self.camera.position.z = object.z1;
+        self.controls.target.x = object.x2;
+        self.controls.target.y = object.y2;
+        self.controls.target.z = object.z2;
+        self.controls.update();
+      });
+      tween.onComplete(function () {
+        self.controls.enabled = true;
+        callBack && callBack();
+      });
+      tween.easing(TWEEN.Easing.Cubic.InOut);
+      tween.start();
     },
     init() {
       let self = this;
@@ -71,7 +131,7 @@ export default {
         0.2,
         1000
       );
-      /* this.camera.position.set(0, 100, 20); */
+      /* this.camera.position.set(0, 40, 100); */
       this.camera.position.set(0, 100, 50);
 
       // 文字
@@ -97,10 +157,7 @@ export default {
         .getElementById("WebGL-output")
         .appendChild(this.renderer.domElement);
 
-      this.controls = new OrbitControls(
-        this.camera,
-        this.renderer.domElement
-      );
+      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
       this.controls.maxPolarAngle = Math.PI * 0.5;
       this.renderer.domElement.addEventListener("click", (event) => {
         /* self.showCard = false */
@@ -160,8 +217,6 @@ export default {
         map: groundTexture,
       });
 
-      
-
       let mesh = new THREE.Mesh(
         new THREE.PlaneGeometry(1200, 1200),
         groundMaterial
@@ -181,14 +236,17 @@ export default {
         self.loadscene.traverse(function (object) {
           if (object.isMesh) {
             object.castShadow = true;
-            object.material.opacity = 1
+            object.material.opacity = 0.6;
             object.material.transparent = true;
-            object.material.colorWrite = true
-            object.material.flatShading = true
-            if (object.name == "jie") {
+            object.material.colorWrite = true;
+            object.material.flatShading = true;
+            if (object.name == "zhe_2") {
               // 改变主体颜色
               /* object.material.color = new THREE.Color(0x8E9A87) */
-              object.material.emissive = new THREE.Color(0x2c8c21)
+              object.material.emissive = new THREE.Color(0x0950ca);
+            }
+            if (object.name == "jie") {
+              object.material.emissive = new THREE.Color(0xffffff);
             }
           }
         });
@@ -211,7 +269,9 @@ export default {
           if (object.isMesh) {
             let color = new THREE.Color(0x045526);
             object.material.emissive = color;
-            object.material.emissiveIntensity = 0.6;
+            object.material.emissiveIntensity = 2;
+            object.material.opacity = 0.8;
+            object.material.transparent = true;
             console.log("objectcolor", object);
             object.castShadow = true;
           }
@@ -222,6 +282,27 @@ export default {
 
         self.scene.add(self.loadscene2);
       });
+    },
+    loadLine() {
+      //创建条形平面-箭头流动的路径
+      const geometry = new THREE.PlaneGeometry(20, 2, 32);
+
+      //加载纹理
+      let arrowLineTexture = new THREE.TextureLoader().load(
+        "/models/right.png"
+      );
+      arrowLineTexture.wrapS = arrowLineTexture.wrapT = THREE.RepeatWrapping; //每个都重复
+      arrowLineTexture.repeat.set(10, 1); //水平重复10次
+      arrowLineTexture.needsUpdate = true;
+
+      // 加载的纹理作为纹理贴图创建材质
+      let materials = new THREE.MeshBasicMaterial({
+        map: arrowLineTexture,
+        side: THREE.DoubleSide,
+      });
+      const mesh = new THREE.Mesh(geometry, materials);
+      mesh.position.set(0,10,0)
+      this.scene.add(mesh);
     },
     loaderImg() {
       let seft = this;
@@ -268,8 +349,6 @@ export default {
       );
 
       mesh.rotation.set(-80, 0, 0);
-
-
 
       this.loadscene.children[2].add(mesh);
       console.log("this.loadscene", this.loadscene);
@@ -361,6 +440,7 @@ export default {
       requestAnimationFrame(this.animate);
       this.renderer.render(this.scene, this.camera);
       this.labelRenderer.render(this.scene, this.camera);
+      TWEEN.update();
     },
   },
   mounted() {

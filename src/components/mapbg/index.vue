@@ -2,6 +2,7 @@
   <div id="WebGL-output">
     <Card v-if="showCard" @close="close" :station-name="stationName"></Card>
     <!-- <div class="title one" ref="one">第一个盒子</div> -->
+    <canvas id="can" width="300" height="300"></canvas>
   </div>
 </template>
 <script>
@@ -9,11 +10,14 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Card from "../../components/card/index.vue";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import {
   CSS2DRenderer,
   CSS2DObject,
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import TWEEN from "@tweenjs/tween.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 export default {
   name: "mapbg",
   components: {
@@ -29,7 +33,7 @@ export default {
       width: 0,
       height: 1080,
       modelUrl: "/models/QB.glb",
-      modelUrl2: "/models/DX1.glb",
+      modelUrl2: "/models/11.glb",
       showCard: false,
       loadscene: null,
       loadscene2: null,
@@ -148,7 +152,7 @@ export default {
       // 默认是LinearToneMapping。查看Renderer constants以获取其它备选项
       this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
       // 色调映射的曝光级别。默认是1
-      this.renderer.toneMappingExposure = 1;
+      /* this.renderer.toneMappingExposure = 1; */
       this.renderer.domElement.style.position = "absolute";
       this.renderer.domElement.style.top = "0px";
       //this.renderer.shadowMapEnabled = true;
@@ -196,17 +200,21 @@ export default {
       // 坐标线
       /* let axes = new THREE.AxisHelper(100);
       this.scene.add(axes); */
-      let ambientLight = new THREE.AmbientLight(0x0c0c0c, 1);
+      let ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
       this.scene.add(ambientLight);
 
-      let dirlight = new THREE.DirectionalLight(0xdfebff, 1);
+      /* let dirlight = new THREE.DirectionalLight(0xdfebff, 1);
       dirlight.position.set(20, 20, 20);
-      this.scene.add(dirlight);
+      this.scene.add(dirlight); */
+      let light = new THREE.PointLight(0xe38210, 1);
+      light.position.set(0, 50, 0);
+      light.name = "点光源";
+      this.scene.add(light);
 
       /* let light = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
       this.scene.add(light); */
-
-      const loader = new THREE.TextureLoader();
+      // 添加底部图片
+      /*  const loader = new THREE.TextureLoader();
       const groundTexture = loader.load("/models/bg.png");
       groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
       groundTexture.repeat.set(25, 25);
@@ -224,6 +232,126 @@ export default {
       mesh.position.y = -50;
       mesh.rotation.x = -Math.PI / 2;
       mesh.receiveShadow = true;
+      this.scene.add(mesh); */
+    },
+    loadCanvas() {
+      let self = this;
+      // Set canvas drawing surface
+      var space = document.getElementById("can");
+      var surface = space.getContext("2d");
+      surface.scale(1, 1);
+
+      // Set Particles
+      var particles = [];
+      var particle_count = 150;
+      for (var i = 0; i < particle_count; i++) {
+        particles.push(new particle());
+      }
+      var time = 0;
+      // Set wrapper and canvas items size
+      var canvasWidth = 480;
+      var canvasHeight = 480;
+      /* $(".wrapper").css({ width: canvasWidth, height: canvasHeight });
+      $("#surface").css({ width: canvasWidth, height: canvasHeight }); */
+
+      // shim layer with setTimeout fallback from Paul Irish
+      window.requestAnimFrame = (function () {
+        return (
+          window.requestAnimationFrame ||
+          window.webkitRequestAnimationFrame ||
+          window.mozRequestAnimationFrame ||
+          function (callback) {
+            window.setTimeout(callback, 6000 / 60);
+          }
+        );
+      })();
+
+      function particle() {
+        this.speed = { x: -1 + Math.random() * 2, y: -5 + Math.random() * 5 };
+        /* canvasWidth = document.getElementById("can").width;
+        canvasHeight = document.getElementById("can").height; */
+        this.location = { x: 480 / 2, y: 480 / 2 + 35 };
+
+        this.radius = 0.5 + Math.random() * 1;
+
+        this.life = 10 + Math.random() * 10;
+        this.death = this.life;
+
+        this.r = 255;
+        this.g = Math.round(Math.random() * 155);
+        this.b = 0;
+      }
+
+      function ParticleAnimation() {
+        surface.globalCompositeOperation = "source-over";
+        surface.fillStyle = "black";
+        surface.fillRect(0, 0, 480, 480);
+        surface.globalCompositeOperation = "lighter";
+
+        for (var i = 0; i < particles.length; i++) {
+          var p = particles[i];
+
+          surface.beginPath();
+
+          p.opacity = Math.round((p.death / p.life) * 100) / 100;
+          var gradient = surface.createRadialGradient(
+            p.location.x,
+            p.location.y,
+            0,
+            p.location.x,
+            p.location.y,
+            p.radius
+          );
+          gradient.addColorStop(
+            0,
+            "rgba(" + p.r + ", " + p.g + ", " + p.b + ", " + p.opacity + ")"
+          );
+          gradient.addColorStop(
+            0.5,
+            "rgba(" + p.r + ", " + p.g + ", " + p.b + ", " + p.opacity + ")"
+          );
+          gradient.addColorStop(
+            1,
+            "rgba(" + p.r + ", " + p.g + ", " + p.b + ", 0)"
+          );
+          surface.fillStyle = gradient;
+          surface.arc(p.location.x, p.location.y, p.radius, Math.PI * 2, false);
+          surface.fill();
+          p.death--;
+          p.radius++;
+          p.location.x += p.speed.x;
+          p.location.y += p.speed.y;
+
+          //regenerate particles
+          if (p.death < 0 || p.radius < 0) {
+            //a brand new particle replacing the dead one
+            particles[i] = new particle();
+          }
+        }
+
+        requestAnimFrame(ParticleAnimation);
+      }
+
+      ParticleAnimation();
+
+      // canvas画布对象作为CanvasTexture的参数重建一个纹理对象
+      // canvas画布可以理解为一张图片
+      let canvas = document.getElementById("can");
+      var texture = new THREE.CanvasTexture(canvas);
+
+      //打印纹理对象的image属性
+      // console.log(texture.image);
+      //矩形平面
+      /* self.geometry = new THREE.PlaneGeometry(16, 16); */
+      //添加立方体
+      var geometry = new THREE.BoxBufferGeometry(16, 16, 16);
+
+      var material = new THREE.MeshPhongMaterial({
+        map: texture, // 设置纹理贴图
+      });
+      material.map.needsUpdate = true;
+      // 创建一个矩形平面网模型，Canvas画布作为矩形网格模型的纹理贴图
+      var mesh = new THREE.Mesh(geometry, material);
       this.scene.add(mesh);
     },
     loadModel() {
@@ -235,18 +363,43 @@ export default {
         self.loadscene = gltf.scene;
         self.loadscene.traverse(function (object) {
           if (object.isMesh) {
-            object.castShadow = true;
+            /* object.castShadow = true;
             object.material.opacity = 0.6;
             object.material.transparent = true;
             object.material.colorWrite = true;
-            object.material.flatShading = true;
-            if (object.name == "zhe_2") {
+            object.material.flatShading = true; */
+            if (object.name == "zhe_2" ||object.name == "zhe") {
               // 改变主体颜色
-              /* object.material.color = new THREE.Color(0x8E9A87) */
-              object.material.emissive = new THREE.Color(0x0950ca);
+
+              const personTexture = new THREE.TextureLoader();
+              const modeltexture = personTexture.load(
+                "/models/left2right.png"
+              ); // 加载贴图
+              modeltexture.wrapS = THREE.RepeatWrapping;
+              modeltexture.wrapT = THREE.RepeatWrapping;
+              modeltexture.repeat.set(1, 1);
+
+              let modelmaterial = new THREE.MeshLambertMaterial({
+                color: 0x0E3F87,
+                transparent: true, //允许透明计算
+                opacity: 0.9, //半透明设置
+                /* map: modeltexture, */
+              });
+
+              object.material = modelmaterial
+              /* object.material.emissive = new THREE.Color(0x0950ca); */
             }
             if (object.name == "jie") {
-              object.material.emissive = new THREE.Color(0xffffff);
+              /*  object.material.emissive = new THREE.Color(0xffffff); */
+              
+              let modelmaterial = new THREE.MeshLambertMaterial({
+                color: 0xffffff,
+                transparent: true, //允许透明计算
+                opacity: 1, //半透明设置
+                /* map: modeltexture, */
+              });
+
+              object.material = modelmaterial
             }
           }
         });
@@ -267,21 +420,37 @@ export default {
         self.loadscene2 = gltf2.scene;
         self.loadscene2.traverse(function (object) {
           if (object.isMesh) {
-            let color = new THREE.Color(0x045526);
+            /* let color = new THREE.Color(0x045526);
             object.material.emissive = color;
             object.material.emissiveIntensity = 2;
             object.material.opacity = 0.8;
             object.material.transparent = true;
             console.log("objectcolor", object);
-            object.castShadow = true;
+            object.castShadow = true; */
           }
         });
-        self.loadscene2.scale.set(15, 15, 15);
-
-        self.loadscene2.position.set(0, -15, 0);
-
+        self.loadscene2.scale.set(0.3, 0.3, 0.3);
+        self.loadscene2.position.set(0, -10, 0);
         self.scene.add(self.loadscene2);
       });
+    },
+    initRenderPass() {
+      // 加载后期发光效果
+      let renderScene = new RenderPass(this.scene, this.camera);
+      //辉光
+      this.bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        1.6,
+        0.1,
+        0.1
+      );
+      this.bloomPass.strength = 0.1; // 发光强度
+      this.bloomPass.radius = 0; // 发光半径
+      this.bloomPass.threshold = 0.1; // 发光阈值
+      this.renderer.toneMappingExposure = 1.2; //设置场景曝光度
+      this.composer = new EffectComposer(this.renderer);
+      this.composer.addPass(renderScene);
+      this.composer.addPass(this.bloomPass);
     },
     loadLine() {
       //创建条形平面-箭头流动的路径
@@ -301,7 +470,7 @@ export default {
         side: THREE.DoubleSide,
       });
       const mesh = new THREE.Mesh(geometry, materials);
-      mesh.position.set(0,10,0)
+      mesh.position.set(0, 10, 0);
       this.scene.add(mesh);
     },
     loaderImg() {
@@ -437,10 +606,16 @@ export default {
       });
     },
     animate() {
+      let self = this;
+      if (self.scene.getObjectByName("底部小圆")) {
+        self.scene.getObjectByName("底部小圆").rotation.y += 0.03;
+      }
       requestAnimationFrame(this.animate);
+
       this.renderer.render(this.scene, this.camera);
       this.labelRenderer.render(this.scene, this.camera);
       TWEEN.update();
+      this.composer.render();
     },
   },
   mounted() {
@@ -453,7 +628,10 @@ export default {
     this.circle = null;
     this.helper = null;
     this.labelRenderer = null;
-
+    this.raf = null;
+    this.sprite = null;
+    this.bloomPass = null;
+    this.composer = null;
     // 结束
     /* 
     let scaleRate =  baseWidth/1920
@@ -463,7 +641,10 @@ export default {
     let baseHeight = document.documentElement.clientHeight;
     this.width = baseWidth * (1080 / baseHeight);
     window.ob = this;
+
     this.init();
+    this.initRenderPass();
+    /* this.loadCanvas(); */
     this.animate();
     this.loadModel();
   },
@@ -482,7 +663,15 @@ export default {
   cursor: pointer;
 }
 .labelzwz:hover {
-  background-color: rgba(172, 16, 16, 0.6);
+  background-color: rgba(16, 19, 172, 0.6);
   /* background-color: rgb(53, 84, 224); */
+}
+#can {
+  width: 480px;
+  height: 480px;
+  position: absolute;
+  z-index: 9999;
+  margin: 20px auto;
+  display: block;
 }
 </style>
